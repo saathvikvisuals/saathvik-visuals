@@ -11,8 +11,9 @@ import { curationQuestions, deriveCurationResult, type AnswerKey, type CurationC
 
 type Phase = "welcome" | "questions" | "compose" | "entering";
 
-const WELCOME_MS = 5000;
-const COMPOSE_MS = 1500;
+const WELCOME_MS = 1800;
+const COMPOSE_MS = 700;
+const ENTER_MS = 1200;
 
 export function EntranceExperience() {
   const [mounted, setMounted] = useState(false);
@@ -96,7 +97,16 @@ export function EntranceExperience() {
     window.setTimeout(() => {
       document.getElementById("top")?.scrollIntoView({ behavior: "smooth", block: "start" });
       setOpen(false);
-    }, 2500);
+    }, ENTER_MS);
+  }
+
+  function skipToDefault() {
+    setMode("minimal");
+    setInterest("all");
+    setDepth("quick");
+    setCurationSignature("open");
+    sessionStorage.setItem("sv-entrance-seen", "true");
+    openPortfolioWithLoader();
   }
 
   if (!mounted) return null;
@@ -115,8 +125,18 @@ export function EntranceExperience() {
             initial={{ y: 28, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
           >
-            <div className="mb-7 h-1 overflow-hidden rounded-full bg-slate-200">
-              <motion.span className="block h-full rounded-full bg-slate-950" animate={{ width: `${progress}%` }} transition={{ duration: 0.45 }} />
+            <div className="mb-7 flex items-center gap-4">
+              <div className="h-1 flex-1 overflow-hidden rounded-full bg-slate-200">
+                <motion.span className="block h-full rounded-full bg-slate-950" animate={{ width: `${progress}%` }} transition={{ duration: 0.45 }} />
+              </div>
+              {(phase === "welcome" || phase === "questions") && (
+                <button
+                  className="shrink-0 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 transition hover:text-slate-900"
+                  onClick={skipToDefault}
+                >
+                  Skip
+                </button>
+              )}
             </div>
 
             <AnimatePresence mode="wait">

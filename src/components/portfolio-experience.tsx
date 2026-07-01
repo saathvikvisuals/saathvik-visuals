@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
+import { AnimatePresence, motion, useMotionValue, useScroll, useSpring, useTransform, type MotionValue } from "framer-motion";
 import Image from "next/image";
 import type { FormEvent, MouseEvent } from "react";
 import { useEffect, useRef, useState } from "react";
@@ -24,6 +24,7 @@ import { type InterestKey, useExperienceStore } from "@/store/experience-store";
 import { CinematicBackground } from "./cinematic-background";
 import { ExperienceProvider } from "./experience-provider";
 import { ProjectMedia } from "./project-media";
+import { AmbientVideoBackdrop } from "./ambient-video-backdrop";
 import Link from "next/link";
 import { EntranceExperience } from "./entrance-experience";
 
@@ -560,36 +561,11 @@ function getProjectCopy(project: (typeof projects)[number], language: LanguageKe
   };
 }
 
-function getTestimonials(language: LanguageKey) {
-  if (language === "en") return testimonials;
-  const translated: Partial<Record<LanguageKey, typeof testimonials>> = {
-    hi: [
-      { quote: "Kaam template jaisa nahi, product launch jaisa feel hota hai. Direction premium, clear, aur memorable hai.", by: "Collaboration feedback" },
-      { quote: "Motion, hierarchy, aur emotional storytelling par strong attention hai. Har concept real brand experience jaisa lagta hai.", by: "Design review note" },
-      { quote: "Best part clarity hai. Har screen ka reason hai, aur visual system business story ko support karta hai.", by: "Client-style feedback" }
-    ],
-    te: [
-      { quote: "Work template laga kakunda product launch laga feel avutundi. Direction premium, clear, memorable.", by: "Collaboration feedback" },
-      { quote: "Motion, hierarchy, emotional storytelling meeda strong attention undi.", by: "Design review note" },
-      { quote: "Best part clarity. Every screen ki reason undi, visual system business story ni support chestundi.", by: "Client-style feedback" }
-    ],
-    fr: [
-      { quote: "Le travail ressemble moins a un template et plus a un lancement produit premium.", by: "Retour de collaboration" },
-      { quote: "Forte attention au mouvement, a la hierarchie et au storytelling emotionnel.", by: "Note de revue design" },
-      { quote: "Le meilleur point est la clarte. Chaque ecran a une raison.", by: "Retour client-style" }
-    ],
-    es: [
-      { quote: "El trabajo se siente menos como plantilla y mas como lanzamiento premium.", by: "Feedback de colaboracion" },
-      { quote: "Gran atencion al movimiento, jerarquia y storytelling emocional.", by: "Nota de revision" },
-      { quote: "Lo mejor es la claridad. Cada pantalla tiene una razon.", by: "Feedback tipo cliente" }
-    ],
-    de: [
-      { quote: "Die Arbeit fuehlt sich weniger wie ein Template und mehr wie ein Premium-Launch an.", by: "Collaboration Feedback" },
-      { quote: "Starke Aufmerksamkeit fuer Motion, Hierarchie und emotionales Storytelling.", by: "Design Review" },
-      { quote: "Der beste Teil ist Klarheit. Jeder Screen hat einen Grund.", by: "Client-style Feedback" }
-    ]
-  };
-  return translated[language] ?? translated.hi!;
+// Real testimonials are shown exactly as the client wrote them (any language) —
+// never auto-translated, since that would put words in their mouth. The `language`
+// field on each entry is just a display tag.
+function getTestimonials() {
+  return testimonials;
 }
 
 function TopNav() {
@@ -767,56 +743,52 @@ function createNarrationUtterance({
 }
 
 function PaletteMenu() {
-  const [open, setOpen] = useState(false);
+  const [hovered, setHovered] = useState<ModeKey | null>(null);
   const mode = useExperienceStore((state) => state.mode);
   const setMode = useExperienceStore((state) => state.setMode);
+  const shown = hovered ?? mode;
 
   return (
-    <div className="palette-menu-root relative">
-      <button
-        className="palette-trigger magnetic flex h-10 items-center gap-2 rounded-full border hairline bg-white/78 px-3 text-xs font-black text-[var(--ink)] shadow-sm"
-        onClick={() => setOpen((value) => !value)}
-        aria-label="Select visual palette"
-        aria-expanded={open}
-      >
-        <Palette size={15} className="text-[var(--accent)]" />
-        <span className="hidden sm:inline">{modes[mode].label}</span>
-        <span className="grid h-5 w-5 place-items-center rounded-full border border-black/10" style={{ background: modes[mode].paper }}>
-          <span className="h-3 w-3 rounded-full" style={{ background: modes[mode].accent }} />
-        </span>
-        <ChevronDown size={14} />
-      </button>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            className="palette-panel absolute right-0 top-12 z-50 grid w-72 gap-2 rounded-3xl border hairline bg-white/92 p-3 shadow-2xl backdrop-blur-2xl"
-            initial={{ opacity: 0, y: -8, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.96 }}
-          >
-            {(Object.keys(modes) as ModeKey[]).map((key) => (
-              <button
-                key={key}
-                className={cn(
-                  "group flex items-center gap-3 rounded-2xl border p-3 text-left transition",
-                  mode === key ? "border-[var(--accent)] bg-slate-950 text-white" : "hairline bg-white/70 text-[var(--ink)] hover:bg-slate-50"
-                )}
-                onClick={() => {
-                  setMode(key);
-                  setOpen(false);
-                }}
-              >
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-black/10 shadow-inner" style={{ background: modes[key].paper }}>
-                  <span className="h-6 w-6 rounded-full shadow-sm" style={{ background: modes[key].accent }} />
-                </span>
-                <span className="min-w-0">
-                  <strong className="block text-sm">{modes[key].label}</strong>
-                  <small className={mode === key ? "text-white/68" : "text-slate-500"}>{modes[key].intent}</small>
-                </span>
-              </button>
-            ))}
-          </motion.div>
-        )}
+    <div className="palette-row-root flex items-center gap-2 rounded-full border hairline bg-white/78 px-2 py-1.5 shadow-sm">
+      {(Object.keys(modes) as ModeKey[]).map((key) => (
+        <button
+          key={key}
+          className="group relative grid h-7 w-7 place-items-center rounded-full border transition-transform hover:scale-110"
+          style={{
+            background: modes[key].paper,
+            borderColor: mode === key ? modes[key].accent : "rgba(0,0,0,0.1)",
+            borderWidth: mode === key ? 2 : 1,
+          }}
+          onClick={() => setMode(key)}
+          onMouseEnter={() => setHovered(key)}
+          onMouseLeave={() => setHovered(null)}
+          aria-label={`Switch to ${modes[key].label} style`}
+          aria-pressed={mode === key}
+          title={`${modes[key].label} — ${modes[key].intent}`}
+        >
+          <span className="h-3.5 w-3.5 rounded-full shadow-sm" style={{ background: modes[key].accent }} />
+          {mode === key && (
+            <motion.span
+              layoutId="palette-active-ring"
+              className="absolute -inset-1 rounded-full border-2"
+              style={{ borderColor: modes[key].accent }}
+              transition={{ type: "spring", stiffness: 380, damping: 28 }}
+            />
+          )}
+        </button>
+      ))}
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={shown}
+          initial={{ opacity: 0, x: -4 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+          className="hidden pl-1 pr-1 text-[0.65rem] font-black uppercase tracking-wide sm:inline"
+          style={{ color: modes[shown].accent }}
+        >
+          {modes[shown].label}
+        </motion.span>
       </AnimatePresence>
     </div>
   );
@@ -882,8 +854,27 @@ function Hero() {
   const profile = getCurationProfile(interest, language);
   const headline = interest === "all" ? profile.headline : roomForInterest(interest, depth);
 
+  const pointerX = useMotionValue(0.5);
+  const pointerY = useMotionValue(0.5);
+
+  function handlePointerMove(event: MouseEvent<HTMLElement>) {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    pointerX.set((event.clientX - bounds.left) / bounds.width);
+    pointerY.set((event.clientY - bounds.top) / bounds.height);
+  }
+
+  function resetPointer() {
+    pointerX.set(0.5);
+    pointerY.set(0.5);
+  }
+
   return (
-    <section id="top" className="hero-stage relative min-h-screen overflow-hidden px-5 pb-16 pt-28 sm:px-8">
+    <section
+      id="top"
+      className="hero-stage relative min-h-screen overflow-hidden px-5 pb-16 pt-28 sm:px-8"
+      onMouseMove={handlePointerMove}
+      onMouseLeave={resetPointer}
+    >
       <div className="relative z-10 mx-auto grid min-h-[calc(100vh-7rem)] max-w-7xl items-center gap-10 lg:grid-cols-[0.52fr_1.48fr]">
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
           <AnimatedKicker text={profile.kicker} />
@@ -905,40 +896,81 @@ function Hero() {
             </a>
           </div>
         </motion.div>
-        <HeroConstellation />
+        <HeroConstellation pointerX={pointerX} pointerY={pointerY} />
       </div>
+      <ScrollCue />
     </section>
   );
 }
 
-function HeroConstellation() {
+function ScrollCue() {
+  return (
+    <motion.div
+      className="pointer-events-none absolute bottom-7 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 sm:flex"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 1.4, duration: 0.8 }}
+    >
+      <span className="text-[0.62rem] font-black uppercase tracking-[0.32em] text-slate-400">Scroll to explore</span>
+      <motion.span
+        className="h-9 w-px"
+        style={{ background: "linear-gradient(to bottom, var(--accent), transparent)" }}
+        animate={{ scaleY: [0.3, 1, 0.3], opacity: [0.4, 1, 0.4] }}
+        transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+      />
+    </motion.div>
+  );
+}
+
+function HeroConstellation({ pointerX, pointerY }: { pointerX: MotionValue<number>; pointerY: MotionValue<number> }) {
   const interest = useExperienceStore((state) => state.interest);
   const curated = interest === "all" ? projects : projects.filter((project) => project.interests.includes(interest));
   const fallback = projects.filter((project) => !curated.includes(project));
   const featured = [...curated, ...fallback].slice(0, 5);
 
+  // Cursor-driven 3D depth: the whole stack tilts toward the pointer, and each
+  // card drifts at its own rate (nearer cards move more) for real parallax,
+  // not just a uniform float.
+  const tiltX = useTransform(pointerY, [0, 1], [7, -7]);
+  const tiltY = useTransform(pointerX, [0, 1], [-9, 9]);
+  const springTiltX = useSpring(tiltX, { stiffness: 120, damping: 18 });
+  const springTiltY = useSpring(tiltY, { stiffness: 120, damping: 18 });
+
   return (
-    <div className="hero-gallery pointer-events-none relative min-h-[58vh] overflow-hidden rounded-[2.4rem] border hairline bg-white/54 shadow-[0_34px_120px_rgba(15,23,42,0.10)] backdrop-blur-xl">
+    <div className="hero-gallery pointer-events-none relative min-h-[58vh] overflow-hidden rounded-[2.4rem] border hairline bg-white/54 shadow-[0_34px_120px_rgba(15,23,42,0.10)] backdrop-blur-xl" style={{ perspective: 1400 }}>
       <motion.div
         className="hero-orbit absolute inset-0"
+        style={{ rotateX: springTiltX, rotateY: springTiltY, transformStyle: "preserve-3d" }}
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1 }}
       >
         {featured.map((project, index) => (
-          <motion.div
-            key={project.slug}
-            className={`hero-shot hero-shot-${index} absolute overflow-hidden rounded-[2rem] border border-white/60 bg-slate-950 shadow-[0_32px_100px_rgba(15,23,42,0.18)]`}
-            animate={{ y: [0, index % 2 ? 18 : -18, 0], rotate: [0, index % 2 ? -2 : 2, 0] }}
-            transition={{ duration: 7 + index, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <ProjectMedia slug={project.slug} image={project.image} alt="" sizes="56vw" loading={index < 2 ? "eager" : "lazy"} />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/34 to-transparent" />
-          </motion.div>
+          <DepthCard key={project.slug} project={project} index={index} pointerX={pointerX} pointerY={pointerY} />
         ))}
       </motion.div>
       <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-white/72 to-transparent" />
     </div>
+  );
+}
+
+function DepthCard({ project, index, pointerX, pointerY }: { project: ProjectItem; index: number; pointerX: MotionValue<number>; pointerY: MotionValue<number> }) {
+  const depth = 1 + index * 0.45;
+  const driftX = useTransform(pointerX, [0, 1], [-6 * depth, 6 * depth]);
+  const driftY = useTransform(pointerY, [0, 1], [-5 * depth, 5 * depth]);
+  const springX = useSpring(driftX, { stiffness: 90, damping: 16 });
+  const springY = useSpring(driftY, { stiffness: 90, damping: 16 });
+
+  return (
+    <motion.div
+      className={`hero-shot hero-shot-${index} absolute overflow-hidden rounded-[2rem] border border-white/60 bg-slate-950 shadow-[0_32px_100px_rgba(15,23,42,0.18)]`}
+      style={{ x: springX, y: springY, translateZ: index * 12 }}
+      animate={{ y: [0, index % 2 ? 18 : -18, 0], rotate: [0, index % 2 ? -2 : 2, 0] }}
+      transition={{ duration: 7 + index, repeat: Infinity, ease: "easeInOut" }}
+    >
+      <ProjectMedia slug={project.slug} image={project.image} alt="" sizes="56vw" loading={index < 2 ? "eager" : "lazy"} />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/34 to-transparent" />
+    </motion.div>
   );
 }
 
@@ -995,18 +1027,32 @@ function Philosophy() {
           </motion.h2>
         </div>
         <motion.div
-          className="glass rounded-[2rem] p-7 sm:p-10"
+          className="glass relative overflow-hidden rounded-[2rem] p-7 sm:p-10"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
         >
-          <p className="m-0 text-2xl leading-10 text-[var(--ink)]">{language === "en" ? profile.philosophy : t.philosophy}</p>
-          <div className="mt-8 grid gap-3 sm:grid-cols-3">
-            {pageCopy.chips.map((item) => (
-              <div key={item} className="rounded-2xl border hairline bg-white/58 p-4 text-sm font-bold">
-                <Check className="mb-3 text-[var(--accent)]" size={18} />
+          <span
+            aria-hidden="true"
+            className="mode-font pointer-events-none absolute -left-2 -top-6 select-none text-[10rem] font-black leading-none opacity-[0.07] sm:text-[14rem]"
+            style={{ color: "var(--accent)" }}
+          >
+            &ldquo;
+          </span>
+          <p className="relative m-0 text-2xl leading-10 text-[var(--ink)]">{language === "en" ? profile.philosophy : t.philosophy}</p>
+          <div className="relative mt-8 grid gap-3 sm:grid-cols-3">
+            {pageCopy.chips.map((item, index) => (
+              <motion.div
+                key={item}
+                className="rounded-2xl border hairline bg-white/58 p-4 text-sm font-bold"
+                initial={{ opacity: 0, scale: 0.94 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.06 }}
+              >
+                <Check className="mb-3" style={{ color: "var(--accent)" }} size={18} />
                 {item}
-              </div>
+              </motion.div>
             ))}
           </div>
         </motion.div>
@@ -1228,25 +1274,62 @@ function ClientExperience() {
   const language = useExperienceStore((state) => state.language);
   const t = translations[language];
   const pageCopy = getPageCopy(language);
+  const reviews = getTestimonials();
 
   return (
-    <section className="mx-auto max-w-7xl px-5 py-20 sm:px-8">
-      <p className="text-sm font-black uppercase text-[var(--accent)]">{t.satisfaction}</p>
-      <motion.h2
-        className="mode-font mt-3 max-w-4xl text-4xl font-black leading-tight sm:text-6xl"
-        initial={{ opacity: 0, y: 28, filter: "blur(8px)" }}
-        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-        viewport={{ once: true, margin: "-80px" }}
-      >
-        {pageCopy.clientTitle}
-      </motion.h2>
-      <div className="mt-9 grid gap-5 lg:grid-cols-3">
-        {getTestimonials(language).map((item) => (
-          <blockquote key={item.quote} className="glass m-0 rounded-[2rem] p-7">
-            <p className="m-0 text-xl leading-8 text-[var(--ink)]">"{item.quote}"</p>
-            <footer className="mt-6 text-sm font-black text-[var(--accent)]">{item.by}</footer>
-          </blockquote>
-        ))}
+    <section className="relative mx-auto max-w-7xl overflow-hidden rounded-[2.6rem] px-5 py-20 sm:px-8">
+      <AmbientVideoBackdrop slugs={["aarna-salon", "naad", "jaabili"]} />
+      <div className="relative z-10">
+        <p className="text-sm font-black uppercase text-[var(--accent)]">{t.satisfaction}</p>
+        <motion.h2
+          className="mode-font mt-3 max-w-4xl text-4xl font-black leading-tight sm:text-6xl"
+          initial={{ opacity: 0, y: 28, filter: "blur(8px)" }}
+          whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          viewport={{ once: true, margin: "-80px" }}
+        >
+          {pageCopy.clientTitle}
+        </motion.h2>
+
+        {reviews.length === 0 ? (
+          <div className="glass mt-9 rounded-[2rem] p-10 text-center">
+            <p className="m-0 text-lg leading-7 text-slate-600">
+              Client reviews are on the way — every one shown here will be a real response from someone Saathvik has built for.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-9 grid gap-6 lg:grid-cols-3">
+            {reviews.map((item, index) => (
+              <motion.figure
+                key={`${item.name}-${index}`}
+                className="glass relative m-0 rotate-0 rounded-[1.6rem] p-7"
+                style={{ transform: `rotate(${index % 2 === 0 ? -1.2 : 1.4}deg)` }}
+                initial={{ opacity: 0, y: 24, rotate: 0 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ delay: index * 0.08 }}
+              >
+                <blockquote className="handwritten-quote m-0 text-2xl leading-snug text-[var(--ink)]">"{item.quote}"</blockquote>
+                <figcaption className="mt-6 flex items-end justify-between gap-3 border-t hairline pt-4">
+                  <div>
+                    <strong className="block text-sm font-black uppercase tracking-wide text-[var(--accent)]">{item.name}</strong>
+                    {item.project && (
+                      item.projectUrl ? (
+                        <a className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-slate-500 no-underline hover:text-[var(--accent)]" href={item.projectUrl} target="_blank" rel="noreferrer">
+                          {item.project} <ArrowUpRight size={11} />
+                        </a>
+                      ) : (
+                        <span className="mt-1 block text-xs font-bold text-slate-500">{item.project}</span>
+                      )
+                    )}
+                  </div>
+                  {item.language && item.language.toLowerCase() !== "english" && (
+                    <span className="rounded-full border hairline px-2.5 py-1 text-[0.6rem] font-black uppercase tracking-wide text-slate-500">{item.language}</span>
+                  )}
+                </figcaption>
+              </motion.figure>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -1258,21 +1341,28 @@ function Process() {
   const pageCopy = getPageCopy(language);
 
   return (
-    <section id="process" className="mx-auto max-w-7xl px-5 py-20 sm:px-8">
+    <section id="process" className="relative mx-auto max-w-7xl px-5 py-20 sm:px-8">
       <p className="text-sm font-black uppercase text-[var(--accent)]">{t.process}</p>
-      <div className="mt-8 grid gap-4">
+      <div className="relative mt-12 grid gap-10">
+        <div className="absolute bottom-6 left-[27px] top-6 hidden w-px sm:block" style={{ background: "linear-gradient(to bottom, var(--accent), transparent)" }} />
         {pageCopy.processItems.map(([title, text], index) => (
           <motion.div
             key={title}
-            className="grid gap-4 rounded-[1.6rem] border hairline bg-white/50 p-5 backdrop-blur-xl sm:grid-cols-[120px_1fr]"
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+            className={cn("relative grid items-start gap-5 sm:grid-cols-[56px_1fr]", index % 2 === 1 && "sm:pl-12")}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ delay: (index % 4) * 0.05 }}
           >
-            <div className="text-sm font-black text-[var(--accent)]">0{index + 1}</div>
-            <div>
-              <h3 className="mode-font m-0 text-3xl font-black">{title}</h3>
-              <p className="m-0 mt-2 text-slate-600">{text}</p>
+            <div
+              className="relative z-10 grid h-14 w-14 shrink-0 place-items-center rounded-full border-2 text-sm font-black"
+              style={{ borderColor: "var(--accent)", background: "var(--paper)", color: "var(--accent)" }}
+            >
+              0{index + 1}
+            </div>
+            <div className={cn(index % 2 === 1 && "sm:max-w-2xl")}>
+              <h3 className="mode-font m-0 text-3xl font-black sm:text-4xl">{title}</h3>
+              <p className="m-0 mt-2 max-w-xl text-slate-600">{text}</p>
             </div>
           </motion.div>
         ))}
@@ -1317,7 +1407,9 @@ function Contact() {
 
   return (
     <section id="contact" className="mx-auto max-w-7xl px-5 py-24 sm:px-8">
-      <div className="glass rounded-[2.4rem] p-7 sm:p-12">
+      <div className="glass relative overflow-hidden rounded-[2.4rem] p-7 sm:p-12">
+        <AmbientVideoBackdrop slugs={["spotify-drive", "netflix-altitude", "linkedin-creator"]} />
+        <div className="relative z-10">
         <p className="text-sm font-black uppercase text-[var(--accent)]">{pageCopy.contactLabel}</p>
         <motion.h2
           className="mode-font mt-3 max-w-4xl text-5xl font-black leading-tight sm:text-7xl"
@@ -1385,6 +1477,7 @@ function Contact() {
             )}
           </form>
         </div>
+        </div>
       </div>
     </section>
   );
@@ -1396,13 +1489,14 @@ function Footer() {
 
   return (
     <footer className="mx-auto max-w-7xl px-5 pb-10 sm:px-8">
-      <div className="footer-panel grid gap-8 rounded-[2.2rem] border hairline bg-slate-950 p-6 text-white shadow-[0_34px_120px_rgba(15,23,42,0.18)] sm:p-8 lg:grid-cols-[1fr_auto]">
-        <div>
+      <div className="footer-panel relative grid gap-8 overflow-hidden rounded-[2.2rem] border border-white/10 p-6 text-white shadow-[0_34px_120px_rgba(15,23,42,0.18)] backdrop-blur-2xl sm:p-8 lg:grid-cols-[1fr_auto]">
+        <AmbientVideoBackdrop slugs={["aryav", "pawly", "airbnb-nomad"]} tone="dark" />
+        <div className="relative z-10">
           <Image className="rounded-[1.1rem]" src="/brand-favicon.png" alt="Saathvik Visuals" width={54} height={54} />
           <p className="signature-note mt-7 max-w-xl text-5xl leading-none text-white">{pageCopy.footerSignature}</p>
           <p className="mt-6 max-w-lg text-sm leading-6 text-white/58">{pageCopy.footerText}</p>
         </div>
-        <div className="grid content-end gap-3 sm:grid-cols-2 lg:w-[420px]">
+        <div className="relative z-10 grid content-end gap-3 sm:grid-cols-2 lg:w-[420px]">
           <SocialLink href={socialLinks.linkedin} label="LinkedIn" detail={pageCopy.socialProfessional} type="linkedin" />
           <SocialLink href={socialLinks.instagram} label="Instagram" detail="@sunny__fr18" type="instagram" />
           <SocialLink href={socialLinks.github} label="GitHub" detail={pageCopy.socialSource} type="github" />

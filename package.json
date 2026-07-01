@@ -4,13 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack --hostname 127.0.0.1",
-    "prebuild": "node scripts/sync-projects.js project-intake.json --write src/data/auto-projects.json --optional",
+    "prebuild": "node scripts/sync-projects.js project-intake.json --write src/data/auto-projects.json --optional && node scripts/sync-testimonials.js",
     "build": "next build",
     "start": "next start --hostname 127.0.0.1",
     "lint": "next lint",
     "projects:preview": "node scripts/sync-projects.js project-intake.json",
     "projects:sync": "node scripts/sync-projects.js project-intake.json --write src/data/auto-projects.json",
     "projects:example": "node scripts/sync-projects.js project-intake.example.json",
+    "testimonials:sync": "node scripts/sync-testimonials.js",
     "contact:test": "node scripts/test-contact.js"
   },
   "dependencies": {

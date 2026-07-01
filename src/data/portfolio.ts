@@ -1,4 +1,5 @@
 import autoProjects from "./auto-projects.json";
+import testimonialsData from "./testimonials.json";
 
 export type ModeKey = "founder" | "creative" | "minimal" | "future";
 export type LanguageKey = "en" | "hi" | "te" | "ta" | "kn" | "ml" | "bn" | "mr" | "gu" | "fr" | "es" | "de" | "ja" | "ko" | "ar";
@@ -28,9 +29,9 @@ export const modes = {
     intent: "Business clarity",
     accent: "#1d4ed8",
     ink: "#0f172a",
-    paper: "#f7f9fc",
-    glow: "rgba(29, 78, 216, 0.18)",
-    font: "var(--font-raleway)",
+    paper: "#eef3fc",
+    glow: "rgba(29, 78, 216, 0.22)",
+    font: "var(--font-libre-franklin)",
     description: "Results, decisions, client value, and product thinking move to the front."
   },
   creative: {
@@ -38,8 +39,8 @@ export const modes = {
     intent: "Cinematic craft",
     accent: "#7c3aed",
     ink: "#1f1333",
-    paper: "#fbf7ff",
-    glow: "rgba(124, 58, 237, 0.2)",
+    paper: "#f3e8ff",
+    glow: "rgba(124, 58, 237, 0.26)",
     font: "var(--font-raleway)",
     description: "Visual systems, atmosphere, motion, and brand memory become the main story."
   },
@@ -48,8 +49,8 @@ export const modes = {
     intent: "Editorial focus",
     accent: "#111827",
     ink: "#111827",
-    paper: "#fbfaf8",
-    glow: "rgba(17, 24, 39, 0.1)",
+    paper: "#f4f2ec",
+    glow: "rgba(17, 24, 39, 0.12)",
     font: "var(--font-libre)",
     description: "Sharp writing, quiet layouts, and case-study clarity lead the experience."
   },
@@ -58,8 +59,8 @@ export const modes = {
     intent: "Product launch",
     accent: "#0891b2",
     ink: "#082f49",
-    paper: "#f5fbfc",
-    glow: "rgba(8, 145, 178, 0.2)",
+    paper: "#e0f6fa",
+    glow: "rgba(8, 145, 178, 0.26)",
     font: "var(--font-raleway)",
     description: "Depth, particles, advanced interactions, and system-level presentation take over."
   }
@@ -602,20 +603,19 @@ export const metrics = [
   ["2026", "Modern design stack"]
 ];
 
-export const testimonials = [
-  {
-    quote: "The work feels less like a template and more like a product launch. The direction is premium, clear, and memorable.",
-    by: "Collaboration feedback"
-  },
-  {
-    quote: "Strong attention to motion, hierarchy, and emotional storytelling. It makes each concept feel like a real brand experience.",
-    by: "Design review note"
-  },
-  {
-    quote: "The best part is clarity. Each screen has a reason, and the visual system supports the business story.",
-    by: "Client-style feedback"
-  }
-];
+export type Testimonial = {
+  name: string;
+  quote: string;
+  project?: string;
+  projectUrl?: string;
+  language?: string;
+};
+
+// Real client reviews only — synced from a Google Form response sheet via
+// `npm run testimonials:sync` (see scripts/sync-testimonials.js). Empty until
+// real responses come in; the UI shows an honest "not yet" state rather than
+// placeholder quotes.
+export const testimonials = testimonialsData as Testimonial[];
 
 export const socialLinks = {
   email: "mailto:saathvikk202@gmail.com",

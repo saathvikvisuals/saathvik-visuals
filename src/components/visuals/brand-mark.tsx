@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { modes } from "@/data/portfolio";
 import { useExperienceStore } from "@/store/experience-store";
 
-export function BrandMark({ compact = false }: { compact?: boolean }) {
+export function BrandMark({ compact = false, className }: { compact?: boolean; className?: string }) {
   const mode = useExperienceStore((state) => state.mode);
   const active = modes[mode];
 
@@ -12,7 +12,7 @@ export function BrandMark({ compact = false }: { compact?: boolean }) {
     <motion.svg
       aria-label="Saathvik Visuals"
       viewBox="0 0 96 96"
-      className={compact ? "h-10 w-10" : "h-14 w-14"}
+      className={className ?? (compact ? "h-10 w-10" : "h-14 w-14")}
       initial={{ rotate: -8, opacity: 0 }}
       animate={{ rotate: 0, opacity: 1 }}
       transition={{ duration: 0.7 }}
