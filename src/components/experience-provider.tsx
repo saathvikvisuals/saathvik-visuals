@@ -2,12 +2,21 @@
 
 import Lenis from "lenis";
 import { Howl } from "howler";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useMemo, useRef } from "react";
 import { modes } from "@/data/portfolio";
+import { palettes } from "@/data/palettes";
 import { useExperienceStore } from "@/store/experience-store";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 export function ExperienceProvider({ children }: { children: React.ReactNode }) {
   const mode = useExperienceStore((state) => state.mode);
+  const palette = useExperienceStore((state) => state.palette);
+  const theme = useExperienceStore((state) => state.theme);
   const language = useExperienceStore((state) => state.language);
   const audio = useExperienceStore((state) => state.audio);
   const shellRef = useRef<HTMLDivElement>(null);
@@ -23,16 +32,19 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
     []
   );
 
+  // Lenis drives the real scroll; GSAP's ticker replaces Lenis's own rAF loop so
+  // ScrollTrigger (scrubbed/pinned sections + the theatre canvas) stays frame-locked
+  // with the smooth-scroll interpolation instead of drifting a frame behind it.
   useEffect(() => {
     const lenis = new Lenis({ lerp: 0.09, wheelMultiplier: 0.88 });
-    let rafId = 0;
-    function raf(time: number) {
-      lenis.raf(time);
-      rafId = requestAnimationFrame(raf);
+    lenis.on("scroll", ScrollTrigger.update);
+    function tick(time: number) {
+      lenis.raf(time * 1000);
     }
-    rafId = requestAnimationFrame(raf);
+    gsap.ticker.add(tick);
+    gsap.ticker.lagSmoothing(0);
     return () => {
-      cancelAnimationFrame(rafId);
+      gsap.ticker.remove(tick);
       lenis.destroy();
     };
   }, []);
@@ -40,14 +52,15 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     const root = document.documentElement;
     const active = modes[mode];
-    root.style.setProperty("--paper", active.paper);
-    root.style.setProperty("--ink", active.ink);
-    root.style.setProperty("--accent", active.accent);
-    root.style.setProperty("--glow", active.glow);
+    const activePalette = palettes[palette];
+    root.setAttribute("data-theme", theme);
+    root.style.setProperty("--accent", activePalette.accent);
+    root.style.setProperty("--accent-2", activePalette.accent2);
+    root.style.setProperty("--glow", activePalette.glow);
     root.style.setProperty("--mode-font", active.font);
     ensureBrandFavicon();
     if (audio) clickSound.play();
-  }, [audio, clickSound, mode]);
+  }, [audio, clickSound, mode, palette, theme]);
 
   useEffect(() => {
     document.documentElement.lang = language;

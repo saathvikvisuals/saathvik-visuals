@@ -9,7 +9,7 @@ import type { StageProps } from "./types";
 export function JourneyStage({ stage, index, project, accent, seekRatio }: StageProps) {
   return (
     <motion.article
-      className="case-step relative grid gap-5 rounded-[2rem] border hairline bg-white/66 p-5 pl-9 shadow-[0_24px_90px_rgba(15,23,42,0.08)] backdrop-blur-2xl md:grid-cols-[auto_1fr_0.8fr] md:items-center md:p-7 md:pl-12"
+      className="case-step relative grid gap-5 rounded-[2rem] border hairline bg-[var(--card)] p-5 pl-9 shadow-[0_24px_90px_var(--shadow-color)] backdrop-blur-2xl md:grid-cols-[auto_1fr_0.8fr] md:items-center md:p-7 md:pl-12"
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
@@ -23,15 +23,15 @@ export function JourneyStage({ stage, index, project, accent, seekRatio }: Stage
       </div>
       <div>
         <h2 className="mode-font m-0 text-2xl font-black md:text-3xl">{stage.title}</h2>
-        <p className="m-0 mt-3 text-base leading-7 text-slate-650">{stage.copy}</p>
+        <p className="m-0 mt-3 text-base leading-7 text-[var(--muted)]">{stage.copy}</p>
       </div>
-      <div className="relative min-h-48 overflow-hidden rounded-[1.5rem] bg-slate-950 md:min-h-56">
+      <motion.div className="relative min-h-48 overflow-hidden rounded-[1.5rem] bg-[var(--void)] md:min-h-56" whileHover={{ scale: 1.015 }} transition={{ duration: 0.4, ease: "easeOut" }}>
         {stage.useVideo ? (
           <StageVideo slug={project.slug} seekRatio={seekRatio} />
         ) : (
           <ProcessArt accent={accent} variant={index} project={project.slug} palette={project.palette} />
         )}
-      </div>
+      </motion.div>
     </motion.article>
   );
 }

@@ -11,7 +11,7 @@ import { curationQuestions, deriveCurationResult, type AnswerKey, type CurationC
 
 type Phase = "welcome" | "questions" | "compose" | "entering";
 
-const WELCOME_MS = 1800;
+const WELCOME_MS = 1200;
 const COMPOSE_MS = 700;
 const ENTER_MS = 1200;
 
@@ -115,23 +115,23 @@ export function EntranceExperience() {
     <AnimatePresence>
       {open && (
         <motion.div
-          className={cn("entrance-overlay fixed inset-0 z-[90] grid place-items-center bg-[#f8f3e9]/94 p-4 backdrop-blur-2xl sm:p-5", isMobile && "mobile-entrance-overlay")}
+          className={cn("entrance-overlay fixed inset-0 z-[90] grid place-items-center bg-[color-mix(in_srgb,var(--void)_94%,transparent)] p-4 backdrop-blur-2xl sm:p-5", isMobile && "mobile-entrance-overlay")}
           initial={{ opacity: 1 }}
           exit={{ opacity: 0, scale: 1.02 }}
           transition={{ duration: 0.55 }}
         >
           <motion.div
-            className={cn("entrance-card relative w-full max-w-5xl overflow-hidden rounded-[2.5rem] border border-black/10 bg-white/80 p-5 shadow-[0_40px_140px_rgba(15,23,42,0.16)] sm:p-10", isMobile && "mobile-entrance-card")}
+            className={cn("entrance-card relative w-full max-w-5xl overflow-hidden rounded-[2.5rem] border border-[var(--line)] bg-[var(--card)] p-5 shadow-[0_40px_140px_var(--shadow-color)] sm:p-10", isMobile && "mobile-entrance-card")}
             initial={{ y: 28, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
           >
             <div className="mb-7 flex items-center gap-4">
-              <div className="h-1 flex-1 overflow-hidden rounded-full bg-slate-200">
-                <motion.span className="block h-full rounded-full bg-slate-950" animate={{ width: `${progress}%` }} transition={{ duration: 0.45 }} />
+              <div className="h-1 flex-1 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--ink)_14%,transparent)]">
+                <motion.span className="block h-full rounded-full bg-[var(--accent)]" animate={{ width: `${progress}%` }} transition={{ duration: 0.45 }} />
               </div>
               {(phase === "welcome" || phase === "questions") && (
                 <button
-                  className="shrink-0 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 transition hover:text-slate-900"
+                  className="shrink-0 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)] transition hover:text-[var(--ink)]"
                   onClick={skipToDefault}
                 >
                   Skip
@@ -165,16 +165,16 @@ function WelcomeScreen() {
       <div>
         <motion.div className="relative mx-auto grid h-32 w-32 place-items-center" animate={{ scale: [1, 1.035, 1] }} transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}>
           <Image className="rounded-[1.55rem] shadow-2xl" src="/brand-favicon.png" alt="Saathvik Visuals" width={104} height={104} priority />
-          <motion.span className="absolute inset-0 rounded-[2rem] border border-slate-950/10" animate={{ rotate: [0, 5, 0], scale: [0.88, 1.22, 0.88], opacity: [0.18, 0.5, 0.18] }} transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }} />
+          <motion.span className="absolute inset-0 rounded-[2rem] border border-[var(--accent)]/10" animate={{ rotate: [0, 5, 0], scale: [0.88, 1.22, 0.88], opacity: [0.18, 0.5, 0.18] }} transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }} />
         </motion.div>
-        <motion.p className="mt-9 text-xs font-black uppercase tracking-[0.34em] text-slate-500" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45, duration: 1 }}>
+        <motion.p className="mt-9 text-xs font-black uppercase tracking-[0.34em] text-[var(--muted)]" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45, duration: 1 }}>
           Welcome to Saathvik Visuals
         </motion.p>
-        <motion.h1 className="mx-auto mt-4 max-w-xl font-[var(--font-libre)] text-5xl font-normal leading-[0.96] text-slate-950 sm:text-7xl" initial={{ opacity: 0, y: 24, filter: "blur(12px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={{ delay: 0.9, duration: 1.4, ease: [0.16, 1, 0.3, 1] }}>
+        <motion.h1 className="mx-auto mt-4 max-w-xl font-[var(--font-libre)] text-5xl font-normal leading-[0.96] text-[var(--ink)] sm:text-7xl" initial={{ opacity: 0, y: 24, filter: "blur(12px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={{ delay: 0.9, duration: 1.4, ease: [0.16, 1, 0.3, 1] }}>
           Let the room build itself.
         </motion.h1>
-        <motion.div className="mx-auto mt-10 h-1 w-48 overflow-hidden rounded-full bg-slate-200" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4, duration: 0.8 }}>
-          <motion.span className="block h-full rounded-full bg-slate-950" initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ delay: 1.6, duration: 3.1, ease: "easeInOut" }} />
+        <motion.div className="mx-auto mt-10 h-1 w-48 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--ink)_14%,transparent)]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4, duration: 0.8 }}>
+          <motion.span className="block h-full rounded-full bg-[var(--accent)]" initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ delay: 1.6, duration: 3.1, ease: "easeInOut" }} />
         </motion.div>
       </div>
     </motion.div>
@@ -188,27 +188,27 @@ function QuestionScreen({ question, answer, onSelect }: { question: (typeof cura
         <div>
           <Image className="rounded-[1.1rem]" src="/brand-favicon.png" alt="Saathvik Visuals" width={58} height={58} priority />
           <p className="mt-8 text-xs font-black uppercase tracking-[0.32em] text-[var(--accent)]">{question.eyebrow}</p>
-          <h2 className="mode-font mt-3 max-w-2xl text-4xl font-black leading-none text-slate-950 sm:text-6xl">{question.title}</h2>
-          <p className="mt-5 max-w-md text-sm leading-6 text-slate-500">Each answer changes the room, project order, visual mode, and first impression.</p>
+          <h2 className="mode-font mt-3 max-w-2xl text-4xl font-black leading-none text-[var(--ink)] sm:text-6xl">{question.title}</h2>
+          <p className="mt-5 max-w-md text-sm leading-6 text-[var(--muted)]">Each answer changes the room, project order, visual mode, and first impression.</p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           {question.choices.map((choice) => (
             <button
               key={choice.id}
               className={cn(
-                "group min-h-36 rounded-[1.45rem] border p-4 text-left transition hover:-translate-y-1 hover:bg-white",
-                answer === choice.id ? "border-slate-950 bg-slate-950 text-white" : "border-black/10 bg-white/68 text-slate-950"
+                "group min-h-36 rounded-[1.45rem] border p-4 text-left transition hover:-translate-y-1 hover:bg-[color-mix(in_srgb,var(--ink)_8%,transparent)]",
+                answer === choice.id ? "border-[var(--accent)] bg-[var(--accent)] text-white" : "border-[var(--line)] bg-[var(--card)] text-[var(--ink)]"
               )}
               onClick={() => onSelect(choice)}
             >
               <span className="flex items-center justify-between gap-3">
-                <span className="grid h-10 w-10 place-items-center rounded-full border border-black/10 bg-white/70">
-                  {answer === choice.id ? <Check size={17} className="text-slate-950" /> : <span className="h-4 w-4 rounded-full" style={{ background: choice.mode ? modes[choice.mode].accent : "var(--accent)" }} />}
+                <span className="grid h-10 w-10 place-items-center rounded-full border border-[var(--line)] bg-[var(--card)]">
+                  {answer === choice.id ? <Check size={17} className="text-[var(--ink)]" /> : <span className="h-4 w-4 rounded-full" style={{ background: choice.mode ? modes[choice.mode].accent : "var(--accent)" }} />}
                 </span>
                 <ArrowRight className="opacity-40 transition group-hover:translate-x-1 group-hover:opacity-100" size={18} />
               </span>
               <strong className="mt-5 block text-xl">{choice.label}</strong>
-              <span className={cn("mt-2 block text-sm leading-6", answer === choice.id ? "text-white/66" : "text-slate-500")}>{choice.line}</span>
+              <span className={cn("mt-2 block text-sm leading-6", answer === choice.id ? "text-white/66" : "text-[var(--muted)]")}>{choice.line}</span>
             </button>
           ))}
         </div>
@@ -223,13 +223,13 @@ function ComposeScreen({ result }: { result: CurationResult }) {
       <div>
         <div className="relative mx-auto h-28 w-28">
           <Image className="rounded-[1.4rem] shadow-2xl" src="/brand-favicon.png" alt="Saathvik Visuals" fill sizes="112px" priority />
-          <motion.span className="absolute -inset-5 rounded-[2rem] border border-slate-950/10" animate={{ scale: [0.86, 1.12, 0.86], opacity: [0.2, 0.65, 0.2] }} transition={{ duration: 1, repeat: Infinity }} />
+          <motion.span className="absolute -inset-5 rounded-[2rem] border border-[var(--accent)]/10" animate={{ scale: [0.86, 1.12, 0.86], opacity: [0.2, 0.65, 0.2] }} transition={{ duration: 1, repeat: Infinity }} />
         </div>
         <p className="mt-8 text-xs font-black uppercase tracking-[0.32em] text-[var(--accent)]">Designing in a few seconds</p>
-        <h2 className="mode-font mx-auto mt-3 max-w-lg text-4xl font-black leading-none text-slate-950">Building {result.room}.</h2>
-        <div className="mx-auto mt-7 grid max-w-sm gap-2 text-left text-xs font-black uppercase tracking-[0.16em] text-slate-500">
+        <h2 className="mode-font mx-auto mt-3 max-w-lg text-4xl font-black leading-none text-[var(--ink)]">Building {result.room}.</h2>
+        <div className="mx-auto mt-7 grid max-w-sm gap-2 text-left text-xs font-black uppercase tracking-[0.16em] text-[var(--muted)]">
           {["Selecting projects", "Changing visual system", "Preparing the casebook"].map((item, index) => (
-            <motion.div key={item} className="rounded-full border border-black/10 bg-white/70 px-4 py-3" initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.18 }}>
+            <motion.div key={item} className="rounded-full border border-[var(--line)] bg-[var(--card)] px-4 py-3" initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.18 }}>
               {item}
             </motion.div>
           ))}
@@ -252,15 +252,15 @@ function EnteringScreen({ result }: { result: CurationResult }) {
         <div className="relative mx-auto grid h-24 w-24 place-items-center">
           <Image className="rounded-[1.25rem] shadow-2xl" src="/brand-favicon.png" alt="Saathvik Visuals" width={78} height={78} priority />
           <motion.span
-            className="absolute -inset-4 rounded-[1.8rem] border border-slate-950/10"
+            className="absolute -inset-4 rounded-[1.8rem] border border-[var(--accent)]/10"
             animate={{ rotate: 360, scale: [0.96, 1.08, 0.96] }}
             transition={{ rotate: { duration: 1.4, repeat: Infinity, ease: "linear" }, scale: { duration: 1.2, repeat: Infinity, ease: "easeInOut" } }}
           />
         </div>
         <p className="mt-8 text-xs font-black uppercase tracking-[0.32em] text-[var(--accent)]">Opening your curated room</p>
-        <h2 className="mode-font mx-auto mt-3 max-w-2xl text-5xl font-black leading-none text-slate-950 sm:text-7xl">{result.room}</h2>
-        <div className="mx-auto mt-9 h-1.5 w-64 overflow-hidden rounded-full bg-slate-200">
-          <motion.span className="block h-full rounded-full bg-slate-950" initial={{ x: "-100%" }} animate={{ x: "100%" }} transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }} />
+        <h2 className="mode-font mx-auto mt-3 max-w-2xl text-5xl font-black leading-none text-[var(--ink)] sm:text-7xl">{result.room}</h2>
+        <div className="mx-auto mt-9 h-1.5 w-64 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--ink)_14%,transparent)]">
+          <motion.span className="block h-full rounded-full bg-[var(--accent)]" initial={{ x: "-100%" }} animate={{ x: "100%" }} transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }} />
         </div>
       </div>
     </motion.div>

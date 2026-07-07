@@ -21,49 +21,19 @@ export type CurationResult = {
   signature: string;
 };
 
+// Trimmed to a single question: the four-step quiz was adding friction before
+// visitors could see the site at all. One tap still sets mode + interest;
+// depth just defaults to "quick" (see deriveCurationResult's fallback below).
 export const curationQuestions: { key: AnswerKey; eyebrow: string; title: string; choices: CurationChoice[] }[] = [
   {
     key: "visitor",
-    eyebrow: "01 / Start with",
+    eyebrow: "Start with",
     title: "What would you like to explore first?",
     choices: [
       { id: "founder", label: "Business clarity", line: "Show proof, decisions, and value first.", mode: "founder", interest: "founders" },
       { id: "designer", label: "Visual craft", line: "Show systems, motion, and interface taste.", mode: "creative", interest: "visual" },
       { id: "commerce", label: "Service flow", line: "Show booking, selling, and trust-building UX.", mode: "minimal", interest: "commerce" },
       { id: "culture", label: "Story worlds", line: "Show emotion, identity, travel, and sound.", mode: "future", interest: "culture" }
-    ]
-  },
-  {
-    key: "goal",
-    eyebrow: "02 / Priority",
-    title: "What should the experience prioritize?",
-    choices: [
-      { id: "proof", label: "Confidence", line: "Problem, thinking, outcome, and decision value.", mode: "founder", interest: "founders" },
-      { id: "motion", label: "Atmosphere", line: "Cinematic screens, visual rhythm, and motion.", mode: "creative", interest: "visual" },
-      { id: "flow", label: "Action", line: "Commerce, services, booking, and mobile UX.", mode: "minimal", interest: "commerce" },
-      { id: "story", label: "Memory", line: "Culture, editorial rhythm, and memorable journeys.", mode: "future", interest: "culture" }
-    ]
-  },
-  {
-    key: "mood",
-    eyebrow: "03 / Mood",
-    title: "Which viewing style feels right today?",
-    choices: [
-      { id: "focused", label: "Focused", line: "Quiet, sharp, business-readable.", mode: "founder" },
-      { id: "cinematic", label: "Cinematic", line: "Premium motion and visual atmosphere.", mode: "creative" },
-      { id: "minimal", label: "Minimal", line: "Editorial, light, spacious, direct.", mode: "minimal" },
-      { id: "future", label: "Future", line: "Product launch energy and depth.", mode: "future" }
-    ]
-  },
-  {
-    key: "depth",
-    eyebrow: "04 / Detail",
-    title: "How much depth should I open with?",
-    choices: [
-      { id: "short", label: "Quick scan", line: "Keep it light and lead with the strongest work.", depth: "quick" },
-      { id: "case", label: "Case-study path", line: "Guide me toward process and project stories.", depth: "case" },
-      { id: "visual", label: "Visual gallery", line: "Prioritize screenshots, motion, and atmosphere.", interest: "visual", depth: "gallery" },
-      { id: "contact", label: "Hire-ready", line: "Keep trust signals and contact easy to reach.", interest: "founders", depth: "hire" }
     ]
   }
 ];

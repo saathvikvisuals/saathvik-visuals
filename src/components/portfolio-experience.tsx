@@ -1,9 +1,15 @@
 "use client";
 
-import { AnimatePresence, motion, useMotionValue, useScroll, useSpring, useTransform, type MotionValue } from "framer-motion";
+import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
 import type { FormEvent, MouseEvent } from "react";
 import { useEffect, useRef, useState } from "react";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 import {
   ArrowUpRight,
   BriefcaseBusiness,
@@ -12,12 +18,15 @@ import {
   GitBranch,
   Languages,
   Mail,
+  Moon,
   MousePointer2,
   Palette,
+  Sun,
   Volume2,
   VolumeX
 } from "lucide-react";
 import { languageOptions, modes, process, projects, socialLinks, testimonials, translations, type LanguageKey, type ModeKey } from "@/data/portfolio";
+import { palettes, paletteKeys } from "@/data/palettes";
 import { cn } from "@/lib/utils";
 import { roomForInterest, type DepthKey } from "@/lib/curation";
 import { type InterestKey, useExperienceStore } from "@/store/experience-store";
@@ -577,17 +586,18 @@ function TopNav() {
 
   return (
     <header className="fixed left-0 right-0 top-0 z-40 px-4 py-4 sm:px-6">
-      <nav className="gallery-nav mx-auto flex items-center justify-between gap-3 rounded-[1.4rem] border hairline bg-white/62 px-3 py-2 shadow-sm backdrop-blur-2xl">
+      <nav className="gallery-nav mx-auto flex items-center justify-between gap-3 rounded-[1.4rem] border hairline bg-[var(--card)] px-3 py-2 shadow-sm backdrop-blur-2xl">
         <a href="#top" className="flex items-center gap-3 text-sm font-bold text-[var(--ink)] no-underline" onClick={(event) => scrollToSection(event, "top")}>
           <Image className="h-10 w-10 rounded-[0.9rem] object-cover" src="/brand-favicon.png" alt="Saathvik Visuals" width={40} height={40} priority />
         </a>
-        <div className="hidden items-center gap-1 text-[0.66rem] font-black uppercase text-slate-500 md:flex">
-          <a className="rounded-full px-3 py-2 hover:bg-white hover:text-[var(--accent)]" href="#work" onClick={(event) => scrollToSection(event, "work")}>01 {t.navWork}</a>
-          <a className="rounded-full px-3 py-2 hover:bg-white hover:text-[var(--accent)]" href="#process" onClick={(event) => scrollToSection(event, "process")}>02 {t.navProcess}</a>
-          <a className="rounded-full px-3 py-2 hover:bg-white hover:text-[var(--accent)]" href="#contact" onClick={(event) => scrollToSection(event, "contact")}>03 {t.navContact}</a>
+        <div className="hidden items-center gap-1 text-[0.66rem] font-black uppercase text-[var(--muted)] md:flex">
+          <a className="rounded-full px-3 py-2 hover:bg-[color-mix(in_srgb,var(--ink)_10%,transparent)] hover:text-[var(--accent)]" href="#work" onClick={(event) => scrollToSection(event, "work")}>01 {t.navWork}</a>
+          <a className="rounded-full px-3 py-2 hover:bg-[color-mix(in_srgb,var(--ink)_10%,transparent)] hover:text-[var(--accent)]" href="#process" onClick={(event) => scrollToSection(event, "process")}>02 {t.navProcess}</a>
+          <a className="rounded-full px-3 py-2 hover:bg-[color-mix(in_srgb,var(--ink)_10%,transparent)] hover:text-[var(--accent)]" href="#contact" onClick={(event) => scrollToSection(event, "contact")}>03 {t.navContact}</a>
         </div>
         <div className="flex items-center gap-2">
           <PaletteMenu />
+          <ThemeToggle />
           <NarrationButton />
           <LanguageMenu />
         </div>
@@ -652,7 +662,7 @@ function NarrationButton() {
 
   return (
     <button
-      className="audio-narration-trigger magnetic grid h-10 w-10 place-items-center rounded-full border hairline bg-white/70 text-[var(--ink)]"
+      className="audio-narration-trigger magnetic grid h-10 w-10 place-items-center rounded-full border hairline bg-[var(--card)] text-[var(--ink)]"
       onClick={toggleNarration}
       aria-label={speaking ? "Stop narrated portfolio summary" : "Play narrated portfolio summary"}
       title={speaking ? "Stop guide" : `${t.language} audio guide`}
@@ -743,54 +753,87 @@ function createNarrationUtterance({
 }
 
 function PaletteMenu() {
-  const [hovered, setHovered] = useState<ModeKey | null>(null);
-  const mode = useExperienceStore((state) => state.mode);
-  const setMode = useExperienceStore((state) => state.setMode);
-  const shown = hovered ?? mode;
+  const [open, setOpen] = useState(false);
+  const palette = useExperienceStore((state) => state.palette);
+  const setPalette = useExperienceStore((state) => state.setPalette);
+  const active = palettes[palette];
 
   return (
-    <div className="palette-row-root flex items-center gap-2 rounded-full border hairline bg-white/78 px-2 py-1.5 shadow-sm">
-      {(Object.keys(modes) as ModeKey[]).map((key) => (
-        <button
-          key={key}
-          className="group relative grid h-7 w-7 place-items-center rounded-full border transition-transform hover:scale-110"
-          style={{
-            background: modes[key].paper,
-            borderColor: mode === key ? modes[key].accent : "rgba(0,0,0,0.1)",
-            borderWidth: mode === key ? 2 : 1,
-          }}
-          onClick={() => setMode(key)}
-          onMouseEnter={() => setHovered(key)}
-          onMouseLeave={() => setHovered(null)}
-          aria-label={`Switch to ${modes[key].label} style`}
-          aria-pressed={mode === key}
-          title={`${modes[key].label} — ${modes[key].intent}`}
-        >
-          <span className="h-3.5 w-3.5 rounded-full shadow-sm" style={{ background: modes[key].accent }} />
-          {mode === key && (
-            <motion.span
-              layoutId="palette-active-ring"
-              className="absolute -inset-1 rounded-full border-2"
-              style={{ borderColor: modes[key].accent }}
-              transition={{ type: "spring", stiffness: 380, damping: 28 }}
-            />
-          )}
-        </button>
-      ))}
-      <AnimatePresence mode="wait">
-        <motion.span
-          key={shown}
-          initial={{ opacity: 0, x: -4 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.15 }}
-          className="hidden pl-1 pr-1 text-[0.65rem] font-black uppercase tracking-wide sm:inline"
-          style={{ color: modes[shown].accent }}
-        >
-          {modes[shown].label}
-        </motion.span>
+    <div className="palette-menu-root relative">
+      <button
+        className="palette-trigger magnetic flex h-10 items-center gap-2 rounded-full border hairline px-3 text-xs font-black text-[var(--ink)] shadow-sm"
+        onClick={() => setOpen((value) => !value)}
+        aria-label="Choose color palette"
+        aria-expanded={open}
+      >
+        <span
+          className="h-4 w-4 rounded-full shadow-sm"
+          style={{ background: `linear-gradient(135deg, ${active.accent}, ${active.accent2})` }}
+        />
+        <span className="hidden sm:inline">{active.label}</span>
+        <Palette size={14} />
+      </button>
+      <AnimatePresence>
+        {open && (
+          <>
+            <button aria-hidden className="fixed inset-0 z-40 cursor-default" onClick={() => setOpen(false)} tabIndex={-1} />
+            <motion.div
+              className="palette-panel absolute right-0 top-12 z-50 w-72"
+              initial={{ opacity: 0, y: -8, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.96 }}
+              transition={{ duration: 0.18 }}
+            >
+              {paletteKeys.map((key) => (
+                <button
+                  key={key}
+                  className="palette-swatch"
+                  onClick={() => {
+                    setPalette(key);
+                    setOpen(false);
+                  }}
+                  aria-label={`Switch to ${palettes[key].label} palette`}
+                  aria-pressed={palette === key}
+                >
+                  <span
+                    className="palette-swatch-dot"
+                    style={{ background: `linear-gradient(135deg, ${palettes[key].accent}, ${palettes[key].accent2})` }}
+                  />
+                  <span className="palette-swatch-label">{palettes[key].label}</span>
+                </button>
+              ))}
+            </motion.div>
+          </>
+        )}
       </AnimatePresence>
     </div>
+  );
+}
+
+function ThemeToggle() {
+  const theme = useExperienceStore((state) => state.theme);
+  const toggleTheme = useExperienceStore((state) => state.toggleTheme);
+
+  return (
+    <button
+      className="theme-toggle magnetic grid h-10 w-10 place-items-center rounded-full border hairline text-[var(--ink)]"
+      onClick={toggleTheme}
+      aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+      title={theme === "dark" ? "Light mode" : "Dark mode"}
+    >
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.span
+          key={theme}
+          initial={{ opacity: 0, rotate: -90, scale: 0.6 }}
+          animate={{ opacity: 1, rotate: 0, scale: 1 }}
+          exit={{ opacity: 0, rotate: 90, scale: 0.6 }}
+          transition={{ duration: 0.25 }}
+          className="grid place-items-center"
+        >
+          {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+        </motion.span>
+      </AnimatePresence>
+    </button>
   );
 }
 
@@ -803,7 +846,7 @@ function LanguageMenu() {
   return (
     <div className="language-menu-root relative">
       <button
-        className="language-trigger magnetic flex h-10 items-center gap-2 rounded-full border hairline bg-white/78 px-3 text-xs font-black text-[var(--ink)] shadow-sm"
+        className="language-trigger magnetic flex h-10 items-center gap-2 rounded-full border hairline bg-[var(--card)] px-3 text-xs font-black text-[var(--ink)] shadow-sm"
         onClick={() => setOpen((value) => !value)}
         aria-label="Select language"
         aria-expanded={open}
@@ -815,7 +858,7 @@ function LanguageMenu() {
       <AnimatePresence>
         {open && (
           <motion.div
-            className="language-panel absolute right-0 top-12 z-50 grid max-h-[70vh] w-64 gap-1 overflow-auto rounded-3xl border hairline bg-white/90 p-2 shadow-2xl backdrop-blur-2xl"
+            className="language-panel absolute right-0 top-12 z-50 grid max-h-[70vh] w-64 gap-1 overflow-auto rounded-3xl border hairline bg-[var(--card)] p-2 shadow-2xl backdrop-blur-2xl"
             initial={{ opacity: 0, y: -8, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.96 }}
@@ -825,7 +868,7 @@ function LanguageMenu() {
                 key={item.key}
                 className={cn(
                   "flex items-center justify-between rounded-2xl px-3 py-2 text-left text-sm transition",
-                  language === item.key ? "bg-[var(--accent)] text-white" : "text-slate-700 hover:bg-slate-100"
+                  language === item.key ? "bg-[var(--accent)] text-white" : "text-[var(--ink)] hover:bg-[color-mix(in_srgb,var(--ink)_10%,transparent)]"
                 )}
                 onClick={() => {
                   setLanguage(item.key);
@@ -834,7 +877,7 @@ function LanguageMenu() {
               >
                 <span>
                   <strong className="block">{item.native}</strong>
-                  <small className={language === item.key ? "text-white/72" : "text-slate-500"}>{item.label}</small>
+                  <small className={language === item.key ? "text-white/72" : "text-[var(--muted)]"}>{item.label}</small>
                 </span>
                 <span className="text-xs font-black">{item.short}</span>
               </button>
@@ -853,50 +896,50 @@ function Hero() {
   const t = translations[language];
   const profile = getCurationProfile(interest, language);
   const headline = interest === "all" ? profile.headline : roomForInterest(interest, depth);
+  const sectionRef = useRef<HTMLElement>(null);
 
-  const pointerX = useMotionValue(0.5);
-  const pointerY = useMotionValue(0.5);
-
-  function handlePointerMove(event: MouseEvent<HTMLElement>) {
-    const bounds = event.currentTarget.getBoundingClientRect();
-    pointerX.set((event.clientX - bounds.left) / bounds.width);
-    pointerY.set((event.clientY - bounds.top) / bounds.height);
-  }
-
-  function resetPointer() {
-    pointerX.set(0.5);
-    pointerY.set(0.5);
-  }
+  // A one-time curtain-rise reveal on load: GSAP's clip-path timeline gives the
+  // "theatre curtain" opening moment that framer-motion's opacity/transform fades
+  // (used for the headline and everything below) can't produce cleanly.
+  useEffect(() => {
+    if (!sectionRef.current) return;
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        sectionRef.current,
+        { clipPath: "inset(0% 0% 100% 0%)" },
+        { clipPath: "inset(0% 0% 0% 0%)", duration: 1.3, ease: "power4.inOut" }
+      );
+    }, sectionRef);
+    return () => ctx.revert();
+  }, []);
 
   return (
     <section
+      ref={sectionRef}
       id="top"
-      className="hero-stage relative min-h-screen overflow-hidden px-5 pb-16 pt-28 sm:px-8"
-      onMouseMove={handlePointerMove}
-      onMouseLeave={resetPointer}
+      className="hero-stage relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-5 pb-16 pt-28 text-center sm:px-8"
     >
-      <div className="relative z-10 mx-auto grid min-h-[calc(100vh-7rem)] max-w-7xl items-center gap-10 lg:grid-cols-[0.52fr_1.48fr]">
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+      <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center">
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} className="flex flex-col items-center">
           <AnimatedKicker text={profile.kicker} />
           <AnimatedHeadline text={headline} />
           <motion.p
-            className="mt-5 max-w-sm text-base leading-7 text-slate-700"
+            className="mx-auto mt-6 max-w-xl text-base leading-7 text-[var(--muted)] sm:text-lg"
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.35, duration: 0.75 }}
           >
             {language === "en" ? profile.subhead : t.subhead}
           </motion.p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <a className="magnetic inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-6 text-sm font-bold text-white no-underline shadow-xl" href="#work" onClick={(event) => scrollToSection(event, "work")}>
               {t.explore} <ArrowUpRight size={17} />
             </a>
-            <a className="magnetic inline-flex min-h-12 items-center justify-center gap-2 rounded-full border hairline bg-white/72 px-6 text-sm font-bold text-[var(--ink)] no-underline backdrop-blur-xl" href="#contact" onClick={(event) => scrollToSection(event, "contact")}>
+            <a className="magnetic inline-flex min-h-12 items-center justify-center gap-2 rounded-full border hairline bg-[var(--card)] px-6 text-sm font-bold text-[var(--ink)] no-underline backdrop-blur-xl" href="#contact" onClick={(event) => scrollToSection(event, "contact")}>
               {t.contact} <MousePointer2 size={17} />
             </a>
           </div>
         </motion.div>
-        <HeroConstellation pointerX={pointerX} pointerY={pointerY} />
       </div>
       <ScrollCue />
     </section>
@@ -911,65 +954,13 @@ function ScrollCue() {
       animate={{ opacity: 1 }}
       transition={{ delay: 1.4, duration: 0.8 }}
     >
-      <span className="text-[0.62rem] font-black uppercase tracking-[0.32em] text-slate-400">Scroll to explore</span>
+      <span className="text-[0.62rem] font-black uppercase tracking-[0.32em] text-[var(--muted)]">Scroll to explore</span>
       <motion.span
         className="h-9 w-px"
         style={{ background: "linear-gradient(to bottom, var(--accent), transparent)" }}
         animate={{ scaleY: [0.3, 1, 0.3], opacity: [0.4, 1, 0.4] }}
         transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
       />
-    </motion.div>
-  );
-}
-
-function HeroConstellation({ pointerX, pointerY }: { pointerX: MotionValue<number>; pointerY: MotionValue<number> }) {
-  const interest = useExperienceStore((state) => state.interest);
-  const curated = interest === "all" ? projects : projects.filter((project) => project.interests.includes(interest));
-  const fallback = projects.filter((project) => !curated.includes(project));
-  const featured = [...curated, ...fallback].slice(0, 5);
-
-  // Cursor-driven 3D depth: the whole stack tilts toward the pointer, and each
-  // card drifts at its own rate (nearer cards move more) for real parallax,
-  // not just a uniform float.
-  const tiltX = useTransform(pointerY, [0, 1], [7, -7]);
-  const tiltY = useTransform(pointerX, [0, 1], [-9, 9]);
-  const springTiltX = useSpring(tiltX, { stiffness: 120, damping: 18 });
-  const springTiltY = useSpring(tiltY, { stiffness: 120, damping: 18 });
-
-  return (
-    <div className="hero-gallery pointer-events-none relative min-h-[58vh] overflow-hidden rounded-[2.4rem] border hairline bg-white/54 shadow-[0_34px_120px_rgba(15,23,42,0.10)] backdrop-blur-xl" style={{ perspective: 1400 }}>
-      <motion.div
-        className="hero-orbit absolute inset-0"
-        style={{ rotateX: springTiltX, rotateY: springTiltY, transformStyle: "preserve-3d" }}
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1 }}
-      >
-        {featured.map((project, index) => (
-          <DepthCard key={project.slug} project={project} index={index} pointerX={pointerX} pointerY={pointerY} />
-        ))}
-      </motion.div>
-      <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-white/72 to-transparent" />
-    </div>
-  );
-}
-
-function DepthCard({ project, index, pointerX, pointerY }: { project: ProjectItem; index: number; pointerX: MotionValue<number>; pointerY: MotionValue<number> }) {
-  const depth = 1 + index * 0.45;
-  const driftX = useTransform(pointerX, [0, 1], [-6 * depth, 6 * depth]);
-  const driftY = useTransform(pointerY, [0, 1], [-5 * depth, 5 * depth]);
-  const springX = useSpring(driftX, { stiffness: 90, damping: 16 });
-  const springY = useSpring(driftY, { stiffness: 90, damping: 16 });
-
-  return (
-    <motion.div
-      className={`hero-shot hero-shot-${index} absolute overflow-hidden rounded-[2rem] border border-white/60 bg-slate-950 shadow-[0_32px_100px_rgba(15,23,42,0.18)]`}
-      style={{ x: springX, y: springY, translateZ: index * 12 }}
-      animate={{ y: [0, index % 2 ? 18 : -18, 0], rotate: [0, index % 2 ? -2 : 2, 0] }}
-      transition={{ duration: 7 + index, repeat: Infinity, ease: "easeInOut" }}
-    >
-      <ProjectMedia slug={project.slug} image={project.image} alt="" sizes="56vw" loading={index < 2 ? "eager" : "lazy"} />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/34 to-transparent" />
     </motion.div>
   );
 }
@@ -989,7 +980,7 @@ function AnimatedKicker({ text }: { text: string }) {
 
 function AnimatedHeadline({ text }: { text: string }) {
   return (
-    <h1 className="hero-title max-w-xl text-5xl leading-[0.98] tracking-normal sm:text-6xl lg:text-7xl">
+    <h1 className="hero-title mx-auto max-w-4xl text-center text-6xl leading-[0.96] tracking-normal sm:text-7xl lg:text-8xl">
       {text.split(" ").map((word, index) => (
         <motion.span
           key={`${word}-${index}`}
@@ -1044,7 +1035,7 @@ function Philosophy() {
             {pageCopy.chips.map((item, index) => (
               <motion.div
                 key={item}
-                className="rounded-2xl border hairline bg-white/58 p-4 text-sm font-bold"
+                className="rounded-2xl border hairline bg-[var(--card)] p-4 text-sm font-bold"
                 initial={{ opacity: 0, scale: 0.94 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
@@ -1074,6 +1065,35 @@ function ProjectShowcase() {
   const featuredProjects = curatedProjects.slice(0, depthProfile.featured);
   const archivePool = curatedProjects.length > depthProfile.featured ? curatedProjects.slice(depthProfile.featured) : getFallbackProjects(curatedProjects, depth, mode, curationSignature);
   const archiveProjects = archivePool.slice(0, depthProfile.archive);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  // Desktop gets a GSAP-pinned horizontal swipe through the featured work; narrow
+  // viewports skip the pin entirely and fall back to native horizontal scroll-snap
+  // (see .project-reel-pin in globals.css) so mobile never fights a scrubbed pin.
+  useEffect(() => {
+    const section = sectionRef.current;
+    const track = trackRef.current;
+    if (!section || !track || window.matchMedia("(max-width: 900px)").matches) return;
+
+    const ctx = gsap.context(() => {
+      const trigger = ScrollTrigger.create({
+        trigger: section,
+        start: "top top",
+        end: () => `+=${Math.max(track.scrollWidth - window.innerWidth, 0)}`,
+        pin: true,
+        scrub: 1,
+        invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          const distance = Math.max(track.scrollWidth - window.innerWidth, 0);
+          gsap.set(track, { x: -distance * self.progress });
+        }
+      });
+      return () => trigger.kill();
+    }, section);
+
+    return () => ctx.revert();
+  }, [featuredProjects.length]);
 
   return (
     <section id="work" className="py-20" data-depth={depth}>
@@ -1089,17 +1109,23 @@ function ProjectShowcase() {
             >
               {profile.projectLine}
             </motion.h2>
-            <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-600">{depthProfile.line}</p>
+            <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--muted)]">{depthProfile.line}</p>
           </div>
           <a className="inline-flex items-center gap-2 text-sm font-black text-[var(--accent)] no-underline" href={socialLinks.github} target="_blank">
             <GitBranch size={18} /> GitHub
           </a>
         </div>
       </div>
-      <div className="project-reel mx-auto mt-14 grid max-w-7xl gap-14 px-5 pb-8 sm:px-8">
-        {featuredProjects.map((project, index) => (
-          <ProjectScene key={project.name} project={project} index={index} />
-        ))}
+      <div ref={sectionRef} className="project-reel-pin relative mt-14">
+        <div ref={trackRef} className="project-reel flex gap-8 px-5 will-change-transform sm:px-8">
+          {featuredProjects.map((project, index) => (
+            <div key={project.name} className="project-slide w-[90vw] shrink-0 sm:w-[78vw] lg:w-[64vw]">
+              <ProjectScene project={project} index={index} />
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="mx-auto mt-14 max-w-7xl px-5 sm:px-8">
         <ProjectArchive items={archiveProjects} depthProfile={depthProfile} />
       </div>
     </section>
@@ -1170,7 +1196,7 @@ function ProjectScene({ project, index }: { project: (typeof projects)[number]; 
     <motion.article
       ref={ref}
         className={cn(
-        "project-scene relative grid min-h-[76vh] items-center gap-7 overflow-hidden rounded-[2.6rem] border hairline bg-white/62 p-4 shadow-[0_34px_110px_rgba(15,23,42,0.10)] backdrop-blur-2xl md:grid-cols-[1.34fr_0.66fr] md:p-6 lg:p-8",
+        "project-scene relative grid min-h-[76vh] items-center gap-7 overflow-hidden rounded-[2.6rem] border hairline bg-[var(--card)] p-4 shadow-[0_34px_110px_rgba(15,23,42,0.10)] backdrop-blur-2xl md:grid-cols-[1.34fr_0.66fr] md:p-6 lg:p-8",
         isReverse && "md:grid-cols-[0.82fr_1.18fr]"
       )}
       initial={{ opacity: 0, y: 60 }}
@@ -1192,11 +1218,11 @@ function ProjectScene({ project, index }: { project: (typeof projects)[number]; 
           sizes="(min-width: 1024px) 62vw, 94vw"
           priority={index < 2}
         />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-black/18 via-transparent to-white/10" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-black/18 via-transparent to-[color-mix(in_srgb,var(--accent)_18%,transparent)]" />
       </motion.div>
 
       <motion.div
-        className={cn("relative z-10 grid content-center rounded-[2rem] bg-white/54 p-5 backdrop-blur-xl md:p-7", isReverse && "md:order-1")}
+        className={cn("relative z-10 grid content-center rounded-[2rem] bg-[var(--card)] p-5 backdrop-blur-xl md:p-7", isReverse && "md:order-1")}
         initial={{ opacity: 0, x: isReverse ? -34 : 34 }}
         whileInView={{ opacity: 1, x: 0 }}
         viewport={{ once: true, margin: "-80px" }}
@@ -1208,8 +1234,8 @@ function ProjectScene({ project, index }: { project: (typeof projects)[number]; 
         </div>
         <p className="m-0 text-xs font-black uppercase tracking-[0.22em] text-[var(--accent)]">{translatedProject.type}</p>
         <h3 className="mode-font mt-3 text-4xl font-black leading-none text-[var(--ink)] sm:text-5xl">{project.name}</h3>
-        <p className="mt-5 max-w-lg text-xl font-black leading-7 text-slate-800">{translatedProject.tag}</p>
-        <p className="line-clamp-2 mt-4 max-w-xl text-sm leading-6 text-slate-600">{translatedProject.outcome}</p>
+        <p className="mt-5 max-w-lg text-xl font-black leading-7 text-[var(--ink)]">{translatedProject.tag}</p>
+        <p className="line-clamp-2 mt-4 max-w-xl text-sm leading-6 text-[var(--muted)]">{translatedProject.outcome}</p>
 
         <div className="mt-7 flex gap-2">
           {project.palette.map((color) => (
@@ -1221,7 +1247,7 @@ function ProjectScene({ project, index }: { project: (typeof projects)[number]; 
           <Link className="magnetic inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-6 text-sm font-black text-white no-underline" href={`/work/${project.slug}`}>
             {t.liveWork} <ArrowUpRight size={17} />
           </Link>
-          <a className="magnetic inline-flex min-h-12 items-center justify-center gap-2 rounded-full border hairline bg-white/70 px-6 text-sm font-black text-[var(--ink)] no-underline" href={project.github} target="_blank">
+          <a className="magnetic inline-flex min-h-12 items-center justify-center gap-2 rounded-full border hairline bg-[var(--card)] px-6 text-sm font-black text-[var(--ink)] no-underline" href={project.github} target="_blank">
             {t.source} <GitBranch size={17} />
           </a>
         </div>
@@ -1292,7 +1318,7 @@ function ClientExperience() {
 
         {reviews.length === 0 ? (
           <div className="glass mt-9 rounded-[2rem] p-10 text-center">
-            <p className="m-0 text-lg leading-7 text-slate-600">
+            <p className="m-0 text-lg leading-7 text-[var(--muted)]">
               Client reviews are on the way — every one shown here will be a real response from someone Saathvik has built for.
             </p>
           </div>
@@ -1314,16 +1340,16 @@ function ClientExperience() {
                     <strong className="block text-sm font-black uppercase tracking-wide text-[var(--accent)]">{item.name}</strong>
                     {item.project && (
                       item.projectUrl ? (
-                        <a className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-slate-500 no-underline hover:text-[var(--accent)]" href={item.projectUrl} target="_blank" rel="noreferrer">
+                        <a className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-[var(--muted)] no-underline hover:text-[var(--accent)]" href={item.projectUrl} target="_blank" rel="noreferrer">
                           {item.project} <ArrowUpRight size={11} />
                         </a>
                       ) : (
-                        <span className="mt-1 block text-xs font-bold text-slate-500">{item.project}</span>
+                        <span className="mt-1 block text-xs font-bold text-[var(--muted)]">{item.project}</span>
                       )
                     )}
                   </div>
                   {item.language && item.language.toLowerCase() !== "english" && (
-                    <span className="rounded-full border hairline px-2.5 py-1 text-[0.6rem] font-black uppercase tracking-wide text-slate-500">{item.language}</span>
+                    <span className="rounded-full border hairline px-2.5 py-1 text-[0.6rem] font-black uppercase tracking-wide text-[var(--muted)]">{item.language}</span>
                   )}
                 </figcaption>
               </motion.figure>
@@ -1362,7 +1388,7 @@ function Process() {
             </div>
             <div className={cn(index % 2 === 1 && "sm:max-w-2xl")}>
               <h3 className="mode-font m-0 text-3xl font-black sm:text-4xl">{title}</h3>
-              <p className="m-0 mt-2 max-w-xl text-slate-600">{text}</p>
+              <p className="m-0 mt-2 max-w-xl text-[var(--muted)]">{text}</p>
             </div>
           </motion.div>
         ))}
@@ -1421,37 +1447,37 @@ function Contact() {
         </motion.h2>
         <div className="mt-8 grid gap-4 lg:grid-cols-[1fr_0.85fr]">
           <div className="grid gap-3 sm:grid-cols-2">
-            <a className="magnetic rounded-3xl border hairline bg-white/60 p-5 text-[var(--ink)] no-underline" href={socialLinks.email}>
+            <a className="magnetic rounded-3xl border hairline bg-[var(--card)] p-5 text-[var(--ink)] no-underline" href={socialLinks.email}>
               <Mail className="mb-5 text-[var(--accent)]" />
               <strong className="block">{pageCopy.email}</strong>
-              <span className="mt-1 block text-sm text-slate-600">saathvikk202@gmail.com</span>
+              <span className="mt-1 block text-sm text-[var(--muted)]">saathvikk202@gmail.com</span>
             </a>
-            <a className="magnetic rounded-3xl border hairline bg-white/60 p-5 text-[var(--ink)] no-underline" href={socialLinks.linkedin} target="_blank">
+            <a className="magnetic rounded-3xl border hairline bg-[var(--card)] p-5 text-[var(--ink)] no-underline" href={socialLinks.linkedin} target="_blank">
               <SocialIcon type="linkedin" />
               <strong className="mt-5 block">LinkedIn</strong>
-              <span className="mt-1 block text-sm text-slate-600">saathvik-kalepu</span>
+              <span className="mt-1 block text-sm text-[var(--muted)]">saathvik-kalepu</span>
             </a>
-            <a className="magnetic rounded-3xl border hairline bg-white/60 p-5 text-[var(--ink)] no-underline" href={socialLinks.instagram} target="_blank">
+            <a className="magnetic rounded-3xl border hairline bg-[var(--card)] p-5 text-[var(--ink)] no-underline" href={socialLinks.instagram} target="_blank">
               <SocialIcon type="instagram" />
               <strong className="mt-5 block">Instagram</strong>
-              <span className="mt-1 block text-sm text-slate-600">@sunny__fr18</span>
+              <span className="mt-1 block text-sm text-[var(--muted)]">@sunny__fr18</span>
             </a>
-            <a className="magnetic rounded-3xl border hairline bg-white/60 p-5 text-[var(--ink)] no-underline" href={socialLinks.github} target="_blank">
+            <a className="magnetic rounded-3xl border hairline bg-[var(--card)] p-5 text-[var(--ink)] no-underline" href={socialLinks.github} target="_blank">
               <GitBranch className="mb-5 text-[var(--accent)]" />
               <strong className="block">GitHub</strong>
-              <span className="mt-1 block text-sm text-slate-600">github.com/saathvikvisuals</span>
+              <span className="mt-1 block text-sm text-[var(--muted)]">github.com/saathvikvisuals</span>
             </a>
           </div>
           <form className="grid gap-3" onSubmit={submitContact}>
             <input
-              className="min-h-12 rounded-2xl border hairline bg-white/70 px-4 outline-none focus:border-[var(--accent)]"
+              className="min-h-12 rounded-2xl border hairline bg-[var(--card)] px-4 outline-none focus:border-[var(--accent)]"
               placeholder={pageCopy.namePlaceholder}
               value={form.name}
               onChange={(event) => setForm((value) => ({ ...value, name: event.target.value }))}
               required
             />
             <input
-              className="min-h-12 rounded-2xl border hairline bg-white/70 px-4 outline-none focus:border-[var(--accent)]"
+              className="min-h-12 rounded-2xl border hairline bg-[var(--card)] px-4 outline-none focus:border-[var(--accent)]"
               placeholder={pageCopy.emailPlaceholder}
               type="email"
               value={form.email}
@@ -1459,19 +1485,19 @@ function Contact() {
               required
             />
             <textarea
-              className="min-h-32 rounded-2xl border hairline bg-white/70 p-4 outline-none focus:border-[var(--accent)]"
+              className="min-h-32 rounded-2xl border hairline bg-[var(--card)] p-4 outline-none focus:border-[var(--accent)]"
               placeholder={pageCopy.visionPlaceholder}
               value={form.message}
               onChange={(event) => setForm((value) => ({ ...value, message: event.target.value }))}
               minLength={10}
               required
             />
-            <p className="m-0 px-1 text-xs font-bold leading-5 text-slate-500">Minimum 10 characters.</p>
+            <p className="m-0 px-1 text-xs font-bold leading-5 text-[var(--muted)]">Minimum 10 characters.</p>
             <button className="magnetic inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-6 text-sm font-black text-white disabled:cursor-wait disabled:opacity-60" type="submit" disabled={status === "sending"}>
               {t.brief} <BriefcaseBusiness size={17} />
             </button>
             {notice && (
-              <p className={cn("m-0 rounded-2xl border px-4 py-3 text-sm font-bold", status === "sent" ? "border-emerald-300 bg-emerald-50 text-emerald-800" : "border-amber-300 bg-amber-50 text-amber-800")}>
+              <p className={cn("m-0 rounded-2xl border px-4 py-3 text-sm font-bold", status === "sent" ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-300" : "border-amber-400/40 bg-amber-400/10 text-amber-300")}>
                 {notice}
               </p>
             )}
@@ -1536,13 +1562,45 @@ function SocialIcon({ type }: { type: "linkedin" | "instagram" | "github" | "mai
 }
 
 function CustomCursor() {
-  const { scrollYProgress } = useScroll();
-  const scale = useTransform(scrollYProgress, [0, 1], [0.75, 1.35]);
+  const dotRef = useRef<HTMLDivElement>(null);
+
+  // GSAP quickTo drives both the pointer trail and the scroll-linked scale so a
+  // single engine owns the element's transform (mixing framer-motion's transform
+  // writes with GSAP's here would have them silently overwrite each other).
+  useEffect(() => {
+    const dot = dotRef.current;
+    if (!dot) return;
+    gsap.set(dot, { xPercent: -50, yPercent: -50, x: window.innerWidth / 2, y: window.innerHeight / 2, scale: 0.75 });
+    const moveX = gsap.quickTo(dot, "x", { duration: 0.5, ease: "power3" });
+    const moveY = gsap.quickTo(dot, "y", { duration: 0.5, ease: "power3" });
+    const moveScale = gsap.quickTo(dot, "scale", { duration: 0.4, ease: "power2" });
+
+    function move(event: PointerEvent) {
+      moveX(event.clientX);
+      moveY(event.clientY);
+    }
+    window.addEventListener("pointermove", move);
+
+    const trigger = ScrollTrigger.create({
+      trigger: document.documentElement,
+      start: "top top",
+      end: "bottom bottom",
+      scrub: true,
+      onUpdate: (self) => moveScale(0.75 + self.progress * 0.6)
+    });
+
+    return () => {
+      window.removeEventListener("pointermove", move);
+      trigger.kill();
+    };
+  }, []);
+
   return (
-    <motion.div
+    <div
+      ref={dotRef}
       aria-hidden
-      className="pointer-events-none fixed left-[var(--cursor-x)] top-[var(--cursor-y)] z-[60] hidden h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[var(--accent)] mix-blend-multiply md:block"
-      style={{ scale }}
+      className="pointer-events-none fixed left-0 top-0 z-[60] hidden h-8 w-8 rounded-full border border-[var(--accent)] mix-blend-difference md:block"
+      style={{ boxShadow: "0 0 22px var(--glow)" }}
     />
   );
 }
