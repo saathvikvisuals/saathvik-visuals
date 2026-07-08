@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
+import { AnimatePresence, motion, useMotionValue, useScroll, useSpring, useTransform } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
@@ -1182,6 +1182,33 @@ function signatureScore(signature: string) {
   return signature.split("").reduce((total, char) => total + char.charCodeAt(0), 0);
 }
 
+// Cursor-tracked 3D tilt — the classic premium-portfolio touch. Spring-damped
+// so it settles smoothly instead of snapping, and respects reduced-motion
+// (a static card, not a tilting one, for anyone who's asked for less motion).
+function useTilt(strength = 10) {
+  const reduced = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const rawX = useMotionValue(0);
+  const rawY = useMotionValue(0);
+  const rotateX = useSpring(rawX, { stiffness: 160, damping: 20, mass: 0.6 });
+  const rotateY = useSpring(rawY, { stiffness: 160, damping: 20, mass: 0.6 });
+
+  const onMouseMove = (event: React.MouseEvent<HTMLElement>) => {
+    if (reduced) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const px = (event.clientX - rect.left) / rect.width - 0.5;
+    const py = (event.clientY - rect.top) / rect.height - 0.5;
+    rawY.set(px * strength);
+    rawX.set(-py * strength);
+  };
+
+  const onMouseLeave = () => {
+    rawX.set(0);
+    rawY.set(0);
+  };
+
+  return { rotateX, rotateY, onMouseMove, onMouseLeave };
+}
+
 function ProjectScene({ project, index }: { project: (typeof projects)[number]; index: number }) {
   const language = useExperienceStore((state) => state.language);
   const t = translations[language];
@@ -1190,6 +1217,7 @@ function ProjectScene({ project, index }: { project: (typeof projects)[number]; 
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const imageY = useTransform(scrollYProgress, [0, 1], [-24, 24]);
   const imageScale = useTransform(scrollYProgress, [0, 0.55, 1], [0.98, 1.035, 0.99]);
+  const tilt = useTilt(9);
   const isReverse = index % 2 === 1;
 
   return (
@@ -1209,7 +1237,9 @@ function ProjectScene({ project, index }: { project: (typeof projects)[number]; 
           "project-image-shell relative min-h-[42vh] overflow-hidden rounded-[2rem] border hairline bg-slate-950 shadow-2xl md:min-h-[66vh]",
           isReverse && "md:order-2"
         )}
-        style={{ y: imageY, scale: imageScale }}
+        style={{ y: imageY, scale: imageScale, rotateX: tilt.rotateX, rotateY: tilt.rotateY, transformPerspective: 1200 }}
+        onMouseMove={tilt.onMouseMove}
+        onMouseLeave={tilt.onMouseLeave}
       >
         <ProjectMedia
           slug={project.slug}
