@@ -932,7 +932,7 @@ function Hero() {
             {language === "en" ? profile.subhead : t.subhead}
           </motion.p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <a className="magnetic inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-6 text-sm font-bold text-white no-underline shadow-xl" href="#work" onClick={(event) => scrollToSection(event, "work")}>
+            <a className="magnetic inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-6 text-sm font-bold text-white no-underline shadow-xl" href="#work" onClick={(event) => scrollToSection(event, "work")}>
               {t.explore} <ArrowUpRight size={17} />
             </a>
             <a className="magnetic inline-flex min-h-12 items-center justify-center gap-2 rounded-full border hairline bg-[var(--card)] px-6 text-sm font-bold text-[var(--ink)] no-underline backdrop-blur-xl" href="#contact" onClick={(event) => scrollToSection(event, "contact")}>
@@ -1244,7 +1244,7 @@ function ProjectScene({ project, index }: { project: (typeof projects)[number]; 
         </div>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Link className="magnetic inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-6 text-sm font-black text-white no-underline" href={`/work/${project.slug}`}>
+          <Link className="magnetic inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-6 text-sm font-black text-white no-underline" href={`/work/${project.slug}`}>
             {t.liveWork} <ArrowUpRight size={17} />
           </Link>
           <a className="magnetic inline-flex min-h-12 items-center justify-center gap-2 rounded-full border hairline bg-[var(--card)] px-6 text-sm font-black text-[var(--ink)] no-underline" href={project.github} target="_blank">
@@ -1493,7 +1493,7 @@ function Contact() {
               required
             />
             <p className="m-0 px-1 text-xs font-bold leading-5 text-[var(--muted)]">Minimum 10 characters.</p>
-            <button className="magnetic inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-6 text-sm font-black text-white disabled:cursor-wait disabled:opacity-60" type="submit" disabled={status === "sending"}>
+            <button className="magnetic inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-6 text-sm font-black text-white disabled:cursor-wait disabled:opacity-60" type="submit" disabled={status === "sending"}>
               {t.brief} <BriefcaseBusiness size={17} />
             </button>
             {notice && (
