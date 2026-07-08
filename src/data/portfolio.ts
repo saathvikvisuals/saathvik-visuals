@@ -365,12 +365,12 @@ const baseProjects: Project[] = [
       layout: "dashboard",
       hook: "Reputation shouldn't have to live in a PDF.",
       stages: [
-        { label: "01", title: "The Resume Problem", copy: "Professional networks feel resume-first, while modern creators need reputation, content, opportunity, and audience signals in one system." },
-        { label: "02", title: "Mapping Reputation", copy: "Studied creator profiles, credibility signals, audience growth, and how opportunities should appear before a professional commits attention." },
-        { label: "03", title: "Career as a System", copy: "Built the story around reputation first, then creator proof, network strength, analytics, and opportunity discovery." },
+        { label: "01", title: "The Resume Problem", copy: "Professional networks feel resume-first, while modern creators need reputation, content, opportunity, and audience signals in one system.", useVideo: true },
+        { label: "02", title: "Mapping Reputation", copy: "Studied creator profiles, credibility signals, audience growth, and how opportunities should appear before a professional commits attention.", useVideo: true },
+        { label: "03", title: "Career as a System", copy: "Built the story around reputation first, then creator proof, network strength, analytics, and opportunity discovery.", useVideo: true },
         { label: "04", title: "Inside the Dashboard", copy: "Reframed LinkedIn as a career operating system with creator analytics, reputation layers, and clearer opportunity surfaces.", useVideo: true },
         { label: "05", title: "Built to Feel Alive", copy: "The motion system behaves like a career dashboard: score changes, network paths, and content signals respond as one living interface.", useVideo: true },
-        { label: "06", title: "What It Proves", copy: "Shows product strategy, dashboard hierarchy, creator monetization thinking, and modern professional UX." }
+        { label: "06", title: "What It Proves", copy: "Shows product strategy, dashboard hierarchy, creator monetization thinking, and modern professional UX.", useVideo: true }
       ]
     }
   },
@@ -391,12 +391,12 @@ const baseProjects: Project[] = [
       layout: "journey",
       hook: "Nobody books a home. They book three weeks of their life.",
       stages: [
-        { label: "01", title: "Booking Isn't the Real Decision", copy: "Remote workers do not only book stays. They choose internet reliability, work rhythm, neighborhood energy, and long-stay confidence." },
-        { label: "02", title: "What Remote Workers Actually Fear", copy: "Mapped remote-work fears: Wi-Fi reliability, neighborhood rhythm, stay length, local comfort, and the feeling of belonging before booking." },
-        { label: "03", title: "From City Mood to Confidence", copy: "Turned booking into a journey from city mood to work confidence, home detail, lifestyle proof, and long-stay decision." },
+        { label: "01", title: "Booking Isn't the Real Decision", copy: "Remote workers do not only book stays. They choose internet reliability, work rhythm, neighborhood energy, and long-stay confidence.", useVideo: true },
+        { label: "02", title: "What Remote Workers Actually Fear", copy: "Mapped remote-work fears: Wi-Fi reliability, neighborhood rhythm, stay length, local comfort, and the feeling of belonging before booking.", useVideo: true },
+        { label: "03", title: "From City Mood to Confidence", copy: "Turned booking into a journey from city mood to work confidence, home detail, lifestyle proof, and long-stay decision.", useVideo: true },
         { label: "04", title: "Inside the Stay", copy: "Built a nomad-first stay experience with motion, 3D atmosphere, long-stay context, and lifestyle-led decision making.", useVideo: true },
         { label: "05", title: "A Planning Board, Not a Listing", copy: "Scroll movement follows a travel board: maps, cards, and stay details drift like a planning wall instead of a static listing.", useVideo: true },
-        { label: "06", title: "What It Proves", copy: "Demonstrates travel UX, filtering strategy, motion direction, and premium product storytelling." }
+        { label: "06", title: "What It Proves", copy: "Demonstrates travel UX, filtering strategy, motion direction, and premium product storytelling.", useVideo: true }
       ]
     }
   },
@@ -417,11 +417,11 @@ const baseProjects: Project[] = [
       layout: "cinematic",
       hook: "Entertainment should know where you're going.",
       stages: [
-        { label: "01", title: "Context-Blind Streaming", copy: "Streaming interfaces often ignore context. Travel creates a perfect moment for mood, route, language, and destination-aware discovery." },
-        { label: "02", title: "What Changes at Altitude", copy: "Explored how travel changes entertainment intent: route, language, flight mood, destination, and time remaining shape discovery." },
+        { label: "01", title: "Context-Blind Streaming", copy: "Streaming interfaces often ignore context. Travel creates a perfect moment for mood, route, language, and destination-aware discovery.", useVideo: true },
+        { label: "02", title: "What Changes at Altitude", copy: "Explored how travel changes entertainment intent: route, language, flight mood, destination, and time remaining shape discovery.", useVideo: true },
         { label: "03", title: "A Boarding Sequence", copy: "Designed a cinematic altitude experience where entertainment follows the journey and feels like a title sequence.", useVideo: true },
         { label: "04", title: "Titles That Feel Like Flight", copy: "Transitions borrow from title sequences and flight UI, making every content choice feel attached to the journey.", useVideo: true },
-        { label: "05", title: "What It Proves", copy: "Highlights cinematic composition, entertainment UX, and interface mood systems." }
+        { label: "05", title: "What It Proves", copy: "Highlights cinematic composition, entertainment UX, and interface mood systems.", useVideo: true }
       ]
     }
   },
@@ -442,12 +442,12 @@ const baseProjects: Project[] = [
       layout: "dashboard",
       hook: "The best soundtrack knows the road ahead.",
       stages: [
-        { label: "01", title: "Built for Listening, Not Driving", copy: "Music apps are built for listening, not driving context. Routes, pace, weather, and stops can shape a more memorable soundtrack." },
-        { label: "02", title: "Mapping the Road", copy: "Mapped driving contexts: pace, weather, route length, stops, focus, and the emotional shift between city roads and open highways." },
-        { label: "03", title: "Mood Before Playlist", copy: "The flow starts with route mood, then generates soundtrack layers, weather-aware playlists, and safe glanceable controls." },
+        { label: "01", title: "Built for Listening, Not Driving", copy: "Music apps are built for listening, not driving context. Routes, pace, weather, and stops can shape a more memorable soundtrack.", useVideo: true },
+        { label: "02", title: "Mapping the Road", copy: "Mapped driving contexts: pace, weather, route length, stops, focus, and the emotional shift between city roads and open highways.", useVideo: true },
+        { label: "03", title: "Mood Before Playlist", copy: "The flow starts with route mood, then generates soundtrack layers, weather-aware playlists, and safe glanceable controls.", useVideo: true },
         { label: "04", title: "Glanceable by Design", copy: "Created a cinematic driving music concept with motion-led UI, route mood, and contextual playlists.", useVideo: true },
         { label: "05", title: "Controls Built for Motion", copy: "Interactions are built for motion: large controls, route pulses, playlist transitions, and low-distraction changes.", useVideo: true },
-        { label: "06", title: "What It Proves", copy: "Shows interaction design, emotional UX, and visual systems for mobility products." }
+        { label: "06", title: "What It Proves", copy: "Shows interaction design, emotional UX, and visual systems for mobility products.", useVideo: true }
       ]
     }
   },
@@ -468,11 +468,11 @@ const baseProjects: Project[] = [
       layout: "cinematic",
       hook: "Expensive spaces deserve a slower scroll.",
       stages: [
-        { label: "01", title: "Listings Flatten Expensive Spaces", copy: "Luxury property pages often reduce expensive spaces into listing cards, losing atmosphere, trust, and architectural emotion." },
-        { label: "02", title: "What Luxury Buyers Actually Read", copy: "Studied luxury real-estate decision cues: material quality, privacy, scale, neighborhood confidence, and architectural storytelling." },
+        { label: "01", title: "Listings Flatten Expensive Spaces", copy: "Luxury property pages often reduce expensive spaces into listing cards, losing atmosphere, trust, and architectural emotion.", useVideo: true },
+        { label: "02", title: "What Luxury Buyers Actually Read", copy: "Studied luxury real-estate decision cues: material quality, privacy, scale, neighborhood confidence, and architectural storytelling.", useVideo: true },
         { label: "03", title: "A Property Film, Not a Page", copy: "The page unfolds like a property film: arrival, atmosphere, spaces, proof, enquiry, and a quiet close.", useVideo: true },
         { label: "04", title: "Spaces That Breathe", copy: "Scroll pacing is cinematic, with restrained reveals that let the property feel expensive without overwhelming the buyer.", useVideo: true },
-        { label: "05", title: "A Quiet Close", copy: "Positions real estate as a premium product launch instead of a property catalogue." }
+        { label: "05", title: "A Quiet Close", copy: "Positions real estate as a premium product launch instead of a property catalogue.", useVideo: true }
       ]
     }
   },
@@ -493,12 +493,12 @@ const baseProjects: Project[] = [
       layout: "editorial",
       hook: "Trust gets built before the first appointment.",
       stages: [
-        { label: "01", title: "Generic Beauty Sites Lose Trust", copy: "Beauty websites often look generic and fail to communicate trust, taste, packages, artists, and booking confidence." },
-        { label: "02", title: "What Builds Booking Confidence", copy: "Mapped salon trust signals: artist confidence, bridal detail, hygiene, service packages, transformations, and booking comfort." },
-        { label: "03", title: "From Ritual to Reservation", copy: "The experience moves from ritual mood to services, artists, gallery proof, packages, and booking intent." },
+        { label: "01", title: "Generic Beauty Sites Lose Trust", copy: "Beauty websites often look generic and fail to communicate trust, taste, packages, artists, and booking confidence.", useVideo: true },
+        { label: "02", title: "What Builds Booking Confidence", copy: "Mapped salon trust signals: artist confidence, bridal detail, hygiene, service packages, transformations, and booking comfort.", useVideo: true },
+        { label: "03", title: "From Ritual to Reservation", copy: "The experience moves from ritual mood to services, artists, gallery proof, packages, and booking intent.", useVideo: true },
         { label: "04", title: "Artists, Not Just Services", copy: "Designed a polished salon experience with rituals, bridal styling, artist profiles, gallery editorials, and a booking flow.", useVideo: true },
         { label: "05", title: "Soft Motion, Editorial Polish", copy: "Motion stays soft and editorial: image reveals, service cards, and booking steps feel polished rather than loud.", useVideo: true },
-        { label: "06", title: "What It Proves", copy: "Shows premium service positioning, conversion clarity, and visual brand direction." }
+        { label: "06", title: "What It Proves", copy: "Shows premium service positioning, conversion clarity, and visual brand direction.", useVideo: true }
       ]
     }
   },
@@ -519,11 +519,11 @@ const baseProjects: Project[] = [
       layout: "cinematic",
       hook: "People don't plan trips. They plan feelings.",
       stages: [
-        { label: "01", title: "Static Galleries Don't Sell a Feeling", copy: "Tourism pages can become static galleries instead of helping visitors feel a destination and plan a journey." },
-        { label: "02", title: "Planning Starts With Emotion", copy: "Explored destination planning as emotion first: landscape, culture, routes, travel effort, stay rhythm, and confidence to go." },
+        { label: "01", title: "Static Galleries Don't Sell a Feeling", copy: "Tourism pages can become static galleries instead of helping visitors feel a destination and plan a journey.", useVideo: true },
+        { label: "02", title: "Planning Starts With Emotion", copy: "Explored destination planning as emotion first: landscape, culture, routes, travel effort, stay rhythm, and confidence to go.", useVideo: true },
         { label: "03", title: "A Travel Story, Not a Brochure", copy: "The travel story moves through place, discovery, curated routes, gallery depth, planning, and journal-style memory.", useVideo: true },
         { label: "04", title: "Routes You Can Almost Walk", copy: "The interface behaves like a moving travel scrapbook with destination cards, route trails, and soft cinematic reveals.", useVideo: true },
-        { label: "05", title: "What It Proves", copy: "Demonstrates immersive content design, mobile polish, and tourism UX." }
+        { label: "05", title: "What It Proves", copy: "Demonstrates immersive content design, mobile polish, and tourism UX.", useVideo: true }
       ]
     }
   },
@@ -544,12 +544,12 @@ const baseProjects: Project[] = [
       layout: "editorial",
       hook: "Some traditions deserve a modern stage.",
       stages: [
-        { label: "01", title: "Heritage Without the Density", copy: "Classical music interfaces need cultural depth without becoming dense, old-fashioned, or difficult for new learners." },
-        { label: "02", title: "Depth for Experts, Clarity for Beginners", copy: "Balanced classical depth with beginner clarity: instruments, ragas, learning paths, heritage, purchase intent, and multilingual comfort." },
-        { label: "03", title: "Sound Identity First", copy: "The system begins with sound identity, then instrument discovery, raga education, cultural proof, and commerce." },
+        { label: "01", title: "Heritage Without the Density", copy: "Classical music interfaces need cultural depth without becoming dense, old-fashioned, or difficult for new learners.", useVideo: true },
+        { label: "02", title: "Depth for Experts, Clarity for Beginners", copy: "Balanced classical depth with beginner clarity: instruments, ragas, learning paths, heritage, purchase intent, and multilingual comfort.", useVideo: true },
+        { label: "03", title: "Sound Identity First", copy: "The system begins with sound identity, then instrument discovery, raga education, cultural proof, and commerce.", useVideo: true },
         { label: "04", title: "Instruments, Ragas, Discovery", copy: "Built a modern cultural experience around instruments, ragas, taal, multilingual navigation, and discovery-led commerce.", useVideo: true },
         { label: "05", title: "Visual Rhythm, Like Music", copy: "Visual rhythm follows music: waveforms, taal-like repetition, warm transitions, and focused product moments.", useVideo: true },
-        { label: "06", title: "What It Proves", copy: "Balances heritage, education, visual richness, and lightweight product flow." }
+        { label: "06", title: "What It Proves", copy: "Balances heritage, education, visual richness, and lightweight product flow.", useVideo: true }
       ]
     }
   },
@@ -570,12 +570,12 @@ const baseProjects: Project[] = [
       layout: "journey",
       hook: "Care should feel as warm online as it does in person.",
       stages: [
-        { label: "01", title: "Pet Commerce Feels Cluttered", copy: "Pet commerce needs warmth, trust, care guidance, and shopping flow without feeling cluttered." },
-        { label: "02", title: "What Builds Care Trust", copy: "Mapped pet-care trust: product safety, nutrition guidance, quick shopping, care education, community warmth, and responsive purchase flow." },
-        { label: "03", title: "Shop, Guide, Community", copy: "The journey blends shop, care guide, category confidence, community proof, cart flow, and repeat purchase logic." },
+        { label: "01", title: "Pet Commerce Feels Cluttered", copy: "Pet commerce needs warmth, trust, care guidance, and shopping flow without feeling cluttered.", useVideo: true },
+        { label: "02", title: "What Builds Care Trust", copy: "Mapped pet-care trust: product safety, nutrition guidance, quick shopping, care education, community warmth, and responsive purchase flow.", useVideo: true },
+        { label: "03", title: "Shop, Guide, Community", copy: "The journey blends shop, care guide, category confidence, community proof, cart flow, and repeat purchase logic.", useVideo: true },
         { label: "04", title: "Warm by Default", copy: "Designed a responsive pet care storefront with shop, resources, community pages, and cart flow.", useVideo: true },
         { label: "05", title: "Mobile-First Shopping", copy: "Interactions stay warm and useful: category taps, product guidance, cart motion, and mobile-first shopping behavior.", useVideo: true },
-        { label: "06", title: "What It Proves", copy: "Shows practical product UX, approachable brand design, and responsive commerce." }
+        { label: "06", title: "What It Proves", copy: "Shows practical product UX, approachable brand design, and responsive commerce.", useVideo: true }
       ]
     }
   }
