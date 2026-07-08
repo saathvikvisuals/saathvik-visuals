@@ -38,15 +38,36 @@ async function main() {
   }
 
   const header = rows[0].map((cell) => cell.trim().toLowerCase());
-  const col = (...names) => names.map((n) => header.indexOf(n)).find((i) => i !== -1) ?? -1;
+  // Matches by substring rather than exact string, since real-world form
+  // editing (descriptions typed into titles, reworded questions) means the
+  // published header rarely matches the documented wording byte-for-byte.
+  // Each matcher is checked in order and only against headers not already
+  // claimed by an earlier, more specific column, so overlapping phrases
+  // (e.g. "experience" appears in both the rating and quote questions) don't
+  // collide.
+  const claimed = new Set();
+  const col = (...substrings) => {
+    for (let i = 0; i < header.length; i += 1) {
+      if (claimed.has(i)) continue;
+      if (substrings.some((s) => header[i].includes(s))) {
+        claimed.add(i);
+        return i;
+      }
+    }
+    return -1;
+  };
 
-  const nameCol = col("your name", "name");
-  const quoteCol = col("your experience (write in any language you're comfortable in)", "your experience", "review", "quote");
-  const projectCol = col("which project / website did saathvik build for you?", "project", "website");
-  const projectUrlCol = col("project link (optional)", "project url", "website link");
-  const languageCol = col("what language did you write in?", "language");
-  const consentCol = col("ok to show this publicly on the portfolio site?", "consent", "can we share this publicly?");
-  const ratingCol = col("how would you rate your experience?", "rating", "your rating");
+  // Order matters: more specific matchers must claim their column before a
+  // broader fallback (e.g. quoteCol's "your experience" fallback) gets a
+  // chance to steal it — "your experience" appears in both the rating and
+  // quote questions, so ratingCol has to resolve first.
+  const nameCol = col("your name");
+  const ratingCol = col("rate your experience", "rating");
+  const quoteCol = col("write in any language you're comfortable", "your experience", "review", "quote");
+  const projectUrlCol = col("project link", "project url", "website link");
+  const projectCol = col("project", "website");
+  const languageCol = col("what language did you write", "language");
+  const consentCol = col("share this publicly", "show this publicly", "consent");
 
   const entries = rows
     .slice(1)
