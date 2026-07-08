@@ -22,6 +22,7 @@ import {
   Moon,
   MousePointer2,
   Palette,
+  Star,
   Sun,
   Volume2,
   VolumeX,
@@ -1422,6 +1423,17 @@ function ClientExperience() {
                 viewport={{ once: true, margin: "-60px" }}
                 transition={{ delay: index * 0.08 }}
               >
+                {item.rating && (
+                  <div className="mb-3 flex gap-0.5" aria-label={`${item.rating} out of 5 stars`}>
+                    {Array.from({ length: 5 }).map((_, star) => (
+                      <Star
+                        key={star}
+                        size={15}
+                        className={star < item.rating! ? "fill-[var(--accent)] text-[var(--accent)]" : "text-[var(--muted)]"}
+                      />
+                    ))}
+                  </div>
+                )}
                 <blockquote className="handwritten-quote m-0 text-2xl leading-snug text-[var(--ink)]">"{item.quote}"</blockquote>
                 <figcaption className="mt-6 flex items-end justify-between gap-3 border-t hairline pt-4">
                   <div>

@@ -609,6 +609,7 @@ export type Testimonial = {
   project?: string;
   projectUrl?: string;
   language?: string;
+  rating?: number;
 };
 
 // Real client reviews only — synced from a Google Form response sheet via

@@ -46,18 +46,23 @@ async function main() {
   const projectUrlCol = col("project link (optional)", "project url", "website link");
   const languageCol = col("what language did you write in?", "language");
   const consentCol = col("ok to show this publicly on the portfolio site?", "consent", "can we share this publicly?");
+  const ratingCol = col("how would you rate your experience?", "rating", "your rating");
 
   const entries = rows
     .slice(1)
     .filter((row) => row.some((cell) => cell.trim().length > 0))
     .filter((row) => consentCol === -1 || /^\s*(yes|y|true)\s*$/i.test(row[consentCol] ?? ""))
-    .map((row) => ({
-      name: (row[nameCol] || "").trim(),
-      quote: (row[quoteCol] || "").trim(),
-      project: projectCol !== -1 ? (row[projectCol] || "").trim() || undefined : undefined,
-      projectUrl: projectUrlCol !== -1 ? (row[projectUrlCol] || "").trim() || undefined : undefined,
-      language: languageCol !== -1 ? (row[languageCol] || "").trim() || undefined : undefined,
-    }))
+    .map((row) => {
+      const ratingRaw = ratingCol !== -1 ? Number.parseInt((row[ratingCol] || "").trim(), 10) : NaN;
+      return {
+        name: (row[nameCol] || "").trim(),
+        quote: (row[quoteCol] || "").trim(),
+        project: projectCol !== -1 ? (row[projectCol] || "").trim() || undefined : undefined,
+        projectUrl: projectUrlCol !== -1 ? (row[projectUrlCol] || "").trim() || undefined : undefined,
+        language: languageCol !== -1 ? (row[languageCol] || "").trim() || undefined : undefined,
+        rating: Number.isFinite(ratingRaw) && ratingRaw >= 1 && ratingRaw <= 5 ? ratingRaw : undefined,
+      };
+    })
     .filter((entry) => entry.name && entry.quote);
 
   fs.writeFileSync(OUTPUT_PATH, `${JSON.stringify(entries, null, 2)}\n`);
