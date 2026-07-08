@@ -11,6 +11,8 @@
     "projects:preview": "node scripts/sync-projects.js project-intake.json",
     "projects:sync": "node scripts/sync-projects.js project-intake.json --write src/data/auto-projects.json",
     "projects:example": "node scripts/sync-projects.js project-intake.example.json",
+    "projects:discover": "node scripts/discover-new-projects.mjs",
+    "projects:record": "node scripts/record-project-videos.mjs",
     "testimonials:sync": "node scripts/sync-testimonials.js",
     "contact:test": "node scripts/test-contact.js"
   },

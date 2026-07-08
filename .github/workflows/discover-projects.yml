@@ -1,0 +1,71 @@
+name: Discover new projects
+
+# Self-curation pipeline: looks for newly deployed saathvikvisuals repos that
+# aren't in the portfolio yet, records a real walkthrough video + poster
+# screenshot of each live site, adds them to project-intake.json, and opens a
+# PR so a human still reviews before anything goes live.
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # daily, 06:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      - name: Discover new deployed repos
+        id: discover
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm run projects:discover
+          if [ -f .new-project-slugs.json ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Record video + screenshot for new projects
+        if: steps.discover.outputs.found == 'true'
+        env:
+          RECORD_SLUGS_FILE: .new-project-slugs.json
+        run: |
+          npx playwright install --with-deps chromium
+          npm run projects:record
+
+      - name: Sync curated project list
+        if: steps.discover.outputs.found == 'true'
+        run: |
+          npm run projects:sync
+          rm -f .new-project-slugs.json
+
+      - name: Open pull request
+        if: steps.discover.outputs.found == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="auto-curate/discovered-projects-$(date +%Y%m%d-%H%M%S)"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add project-intake.json src/data/auto-projects.json public/project-videos public/project-screenshots
+          git commit -m "Auto-curate newly discovered projects"
+          git push origin "$BRANCH"
+          gh pr create \
+            --title "Auto-curate newly discovered projects" \
+            --body "Opened automatically by the discover-projects workflow. Review the recorded video/screenshot and project-intake.json entries before merging — nothing here has been hand-checked." \
+            --base main \
+            --head "$BRANCH"

@@ -1,19 +1,27 @@
-// Records short walkthrough videos of each live deployed project for use in the
-// portfolio (replacing static screenshots). Requires playwright — run with
-// NODE_PATH pointing at an environment that has it installed, e.g.:
+// Records short walkthrough videos (+ a poster screenshot) of each live deployed
+// project for use in the portfolio (replacing static screenshots/placeholder art).
+// Requires playwright — run with NODE_PATH pointing at an environment that has it
+// installed, e.g.:
 //   NODE_PATH=<path-to-playwright-node_modules> node scripts/record-project-videos.mjs
+//
+// By default records the 9 hand-authored projects below. Pass a single slug as
+// argv[2] to record just one. Set RECORD_SLUGS_FILE to a JSON file of
+// [{ slug, url }, ...] (as written by discover-new-projects.mjs) to record a
+// dynamically discovered batch instead — used by the auto-curation workflow.
 import { chromium } from "playwright";
-import { mkdirSync, renameSync, readdirSync, rmSync } from "fs";
+import { mkdirSync, renameSync, readdirSync, rmSync, readFileSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const outDir = join(__dirname, "..", "public", "project-videos");
-mkdirSync(outDir, { recursive: true });
+const videoDir = join(__dirname, "..", "public", "project-videos");
+const screenshotDir = join(__dirname, "..", "public", "project-screenshots");
+mkdirSync(videoDir, { recursive: true });
+mkdirSync(screenshotDir, { recursive: true });
 
 // Kept in sync with the `url` field of each project in src/data/portfolio.ts.
 // Plain JS list (not a TS import) so this script runs with vanilla node + playwright.
-const projects = [
+const staticProjects = [
   { slug: "linkedin-creator", url: "https://linkedin-creator-concept.vercel.app" },
   { slug: "airbnb-nomad", url: "https://airbnb-nomad-concept.vercel.app" },
   { slug: "netflix-altitude", url: "https://netflix-pilot-concept.vercel.app" },
@@ -25,14 +33,24 @@ const projects = [
   { slug: "pawly", url: "https://pawly-pet-store.vercel.app" },
 ];
 
+const dynamicListFile = process.env.RECORD_SLUGS_FILE;
+const projects = dynamicListFile && existsSync(dynamicListFile)
+  ? JSON.parse(readFileSync(dynamicListFile, "utf8"))
+  : staticProjects;
+
 const only = process.argv[2];
 const targets = only ? projects.filter((p) => p.slug === only) : projects;
+
+if (!targets.length) {
+  console.log("Nothing to record.");
+  process.exit(0);
+}
 
 const browser = await chromium.launch();
 
 for (const project of targets) {
   console.log(`Recording ${project.slug} -> ${project.url}`);
-  const tmpDir = join(outDir, `.tmp-${project.slug}`);
+  const tmpDir = join(videoDir, `.tmp-${project.slug}`);
   mkdirSync(tmpDir, { recursive: true });
 
   const context = await browser.newContext({
@@ -44,6 +62,7 @@ for (const project of targets) {
   try {
     await page.goto(project.url, { waitUntil: "domcontentloaded", timeout: 30000 });
     await page.waitForTimeout(2000);
+    await page.screenshot({ path: join(screenshotDir, `${project.slug}.png`) });
 
     const height = await page.evaluate(() => document.body.scrollHeight);
     const steps = Math.min(6, Math.max(3, Math.round(height / 900)));
@@ -66,7 +85,7 @@ for (const project of targets) {
   const files = readdirSync(tmpDir);
   const video = files.find((f) => f.endsWith(".webm"));
   if (video) {
-    renameSync(join(tmpDir, video), join(outDir, `${project.slug}.webm`));
+    renameSync(join(tmpDir, video), join(videoDir, `${project.slug}.webm`));
     console.log(`  saved ${project.slug}.webm`);
   } else {
     console.error(`  no video produced for ${project.slug}`);

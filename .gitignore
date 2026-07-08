@@ -11,3 +11,4 @@ dist
 !public/*.png
 innerWidth
 .vercel
+.new-project-slugs.json
