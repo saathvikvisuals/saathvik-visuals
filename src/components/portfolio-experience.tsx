@@ -18,12 +18,14 @@ import {
   GitBranch,
   Languages,
   Mail,
+  Menu,
   Moon,
   MousePointer2,
   Palette,
   Sun,
   Volume2,
-  VolumeX
+  VolumeX,
+  X
 } from "lucide-react";
 import { languageOptions, modes, process, projects, socialLinks, testimonials, translations, type LanguageKey, type ModeKey } from "@/data/portfolio";
 import { palettes, paletteKeys } from "@/data/palettes";
@@ -577,6 +579,61 @@ function getTestimonials() {
   return testimonials;
 }
 
+function MobileNavMenu() {
+  const [open, setOpen] = useState(false);
+  const language = useExperienceStore((state) => state.language);
+  const t = translations[language];
+
+  const links = [
+    { href: "work", label: `01 ${t.navWork}` },
+    { href: "process", label: `02 ${t.navProcess}` },
+    { href: "contact", label: `03 ${t.navContact}` }
+  ];
+
+  const handleClick = (event: MouseEvent<HTMLAnchorElement>, id: string) => {
+    setOpen(false);
+    scrollToSection(event, id);
+  };
+
+  return (
+    <div className="relative md:hidden">
+      <button
+        className="magnetic grid h-10 w-10 place-items-center rounded-full border hairline text-[var(--ink)]"
+        onClick={() => setOpen((value) => !value)}
+        aria-label={open ? "Close menu" : "Open menu"}
+        aria-expanded={open}
+      >
+        {open ? <X size={18} /> : <Menu size={18} />}
+      </button>
+      <AnimatePresence>
+        {open && (
+          <>
+            <button aria-hidden className="fixed inset-0 z-40 cursor-default" onClick={() => setOpen(false)} tabIndex={-1} />
+            <motion.div
+              className="absolute right-0 top-12 z-50 flex w-56 flex-col gap-1 rounded-[1.2rem] border hairline bg-[var(--card)] p-2 text-xs font-black uppercase text-[var(--muted)] shadow-xl backdrop-blur-2xl"
+              initial={{ opacity: 0, y: -8, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.96 }}
+              transition={{ duration: 0.18 }}
+            >
+              {links.map((link) => (
+                <a
+                  key={link.href}
+                  className="rounded-xl px-3 py-3 hover:bg-[color-mix(in_srgb,var(--ink)_10%,transparent)] hover:text-[var(--accent)]"
+                  href={`#${link.href}`}
+                  onClick={(event) => handleClick(event, link.href)}
+                >
+                  {link.label}
+                </a>
+              ))}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 function TopNav() {
   const curated = useExperienceStore((state) => state.curated);
   const language = useExperienceStore((state) => state.language);
@@ -595,11 +652,12 @@ function TopNav() {
           <a className="rounded-full px-3 py-2 hover:bg-[color-mix(in_srgb,var(--ink)_10%,transparent)] hover:text-[var(--accent)]" href="#process" onClick={(event) => scrollToSection(event, "process")}>02 {t.navProcess}</a>
           <a className="rounded-full px-3 py-2 hover:bg-[color-mix(in_srgb,var(--ink)_10%,transparent)] hover:text-[var(--accent)]" href="#contact" onClick={(event) => scrollToSection(event, "contact")}>03 {t.navContact}</a>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <PaletteMenu />
           <ThemeToggle />
           <NarrationButton />
           <LanguageMenu />
+          <MobileNavMenu />
         </div>
       </nav>
     </header>
@@ -1259,7 +1317,7 @@ function ProjectScene({ project, index }: { project: (typeof projects)[number]; 
         transition={{ delay: 0.12, duration: 0.72 }}
       >
         <div className="mb-8 flex items-center gap-3">
-          <span className="mode-font text-8xl font-black leading-none text-[var(--accent)]/20">0{index + 1}</span>
+          <span className="mode-font text-6xl font-black leading-none text-[var(--accent)]/20 sm:text-8xl">0{index + 1}</span>
           <div className="h-px flex-1 bg-[var(--line)]" />
         </div>
         <p className="m-0 text-xs font-black uppercase tracking-[0.22em] text-[var(--accent)]">{translatedProject.type}</p>

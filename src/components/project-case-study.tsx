@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowUpRight, GitBranch } from "lucide-react";
 import { useEffect } from "react";
-import { type projects, type Story, type StoryStage } from "@/data/portfolio";
+import { translations, type projects, type Story, type StoryStage } from "@/data/portfolio";
 import { ExperienceProvider } from "./experience-provider";
 import { CinematicBackground } from "./cinematic-background";
 import { ProjectMedia } from "./project-media";
@@ -43,7 +43,9 @@ export function ProjectCaseStudy({ project }: { project: Project }) {
 
 function ProjectCaseStudyInner({ project }: { project: Project }) {
   const palette = useExperienceStore((state) => state.palette);
+  const language = useExperienceStore((state) => state.language);
   const activePalette = palettes[palette];
+  const t = translations[language];
   const { scrollYProgress } = useScroll();
   const heroScale = useTransform(scrollYProgress, [0, 0.28], [1, 0.94]);
   const heroY = useTransform(scrollYProgress, [0, 0.28], [0, 80]);
@@ -76,11 +78,11 @@ function ProjectCaseStudyInner({ project }: { project: Project }) {
               <ArrowLeft size={17} /> <Image className="rounded-[0.75rem]" src="/brand-favicon.png" alt="Saathvik Visuals" width={34} height={34} />
             </Link>
             <div className="flex gap-2">
-              <a className="inline-flex h-10 items-center gap-2 rounded-full bg-[var(--ink)] px-4 text-xs font-black text-white no-underline" href={project.url} target="_blank">
-                Live <ArrowUpRight size={15} />
+              <a className="inline-flex h-10 items-center gap-2 rounded-full bg-[var(--accent)] px-4 text-xs font-black text-white no-underline" href={project.url} target="_blank">
+                {t.liveWork} <ArrowUpRight size={15} />
               </a>
-              <a className="hidden h-10 items-center gap-2 rounded-full border hairline bg-[var(--card)] px-4 text-xs font-black text-[var(--ink)] no-underline sm:inline-flex" href={project.github} target="_blank">
-                Source <GitBranch size={15} />
+              <a className="inline-flex h-10 items-center gap-2 rounded-full border hairline bg-[var(--card)] px-4 text-xs font-black text-[var(--ink)] no-underline" href={project.github} target="_blank">
+                {t.source} <GitBranch size={15} />
               </a>
             </div>
           </div>
