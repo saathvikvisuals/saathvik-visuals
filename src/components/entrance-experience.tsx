@@ -119,14 +119,14 @@ export function EntranceExperience() {
     <AnimatePresence>
       {open && (
         <motion.div
-          className={cn("entrance-overlay fixed inset-0 z-[90] grid place-items-center bg-[color-mix(in_srgb,var(--void)_94%,transparent)] p-4 backdrop-blur-2xl sm:p-5", isMobile && "mobile-entrance-overlay")}
+          className={cn("entrance-overlay fixed inset-0 z-[90] grid place-items-center overflow-y-auto bg-[color-mix(in_srgb,var(--void)_94%,transparent)] p-4 backdrop-blur-2xl sm:p-5", isMobile && "mobile-entrance-overlay")}
           initial={{ opacity: 1 }}
           exit={{ opacity: 0, scale: 1.02 }}
           transition={{ duration: 0.55 }}
         >
           <motion.div
             className={cn(
-              "entrance-card relative w-full max-w-5xl overflow-hidden rounded-[2.5rem] border border-[var(--line)] bg-[var(--card)] p-5 shadow-[0_40px_140px_var(--shadow-color)] backdrop-blur-2xl sm:p-10",
+              "entrance-card relative my-auto w-full max-w-5xl overflow-x-hidden overflow-y-auto rounded-[2.5rem] border border-[var(--line)] bg-[var(--card)] p-5 shadow-[0_40px_140px_var(--shadow-color)] backdrop-blur-2xl sm:p-10 sm:max-h-[92svh]",
               isMobile && "mobile-entrance-card"
             )}
             initial={{ y: 28, opacity: 0, scale: 0.98 }}
