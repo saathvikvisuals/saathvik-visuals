@@ -56,11 +56,13 @@ const entries = incoming.map((item) => {
     url: item.url,
     github: item.github,
     image: item.image,
+    ...(item.embedUrl ? { embedUrl: item.embedUrl } : {}),
     palette: item.palette ?? inferPalette(uniqueInterests),
     interests: uniqueInterests,
     problem: item.problem ?? "The existing experience needed clearer positioning, stronger visual hierarchy, and a more confident path to action.",
     solution: item.solution ?? "Designed a focused digital experience with responsive UI, clear sections, visual rhythm, and interaction details that support the user journey.",
-    outcome: item.outcome ?? "Adds a portfolio-ready case study that can be routed into the right Saathvik Visuals curation room automatically."
+    outcome: item.outcome ?? "Adds a portfolio-ready case study that can be routed into the right Saathvik Visuals curation room automatically.",
+    ...(item.story ? { story: item.story } : {})
   };
 });
 

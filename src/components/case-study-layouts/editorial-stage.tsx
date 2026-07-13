@@ -19,7 +19,7 @@ export function EditorialStage({ stage, index, project, accent, seekRatio }: Sta
     >
       <motion.div className={cn("relative min-h-56 overflow-hidden rounded-[1.5rem] bg-[var(--void)] md:min-h-72", reverse && "md:order-2")} whileHover={{ scale: 1.015 }} transition={{ duration: 0.4, ease: "easeOut" }}>
         {stage.useVideo ? (
-          <StageVideo slug={project.slug} seekRatio={seekRatio} />
+          <StageVideo slug={project.slug} seekRatio={seekRatio} videoFile={stage.videoFile} />
         ) : (
           <ProcessArt accent={accent} variant={index} project={project.slug} palette={project.palette} />
         )}

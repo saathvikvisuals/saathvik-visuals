@@ -10,7 +10,18 @@ import { useReducedMotion } from "framer-motion";
  * render ProcessArt behind this, or check `failed`) if the file is missing.
  * Skips autoplay/loop for prefers-reduced-motion (shows the seeked frame, paused).
  */
-export function StageVideo({ slug, seekRatio = 0, className }: { slug: string; seekRatio?: number; className?: string }) {
+export function StageVideo({
+  slug,
+  seekRatio = 0,
+  videoFile,
+  className,
+}: {
+  slug: string;
+  seekRatio?: number;
+  /** Optional distinct clip basename (no extension) for this stage, e.g. "just-enough-home" — falls back to the project's single recorded clip + seekRatio when omitted. */
+  videoFile?: string;
+  className?: string;
+}) {
   const ref = useRef<HTMLVideoElement>(null);
   const [failed, setFailed] = useState(false);
   const reduceMotion = useReducedMotion();
@@ -21,7 +32,7 @@ export function StageVideo({ slug, seekRatio = 0, className }: { slug: string; s
     <video
       ref={ref}
       className={`h-full w-full object-cover ${className ?? ""}`}
-      src={`/project-videos/${slug}.webm`}
+      src={`/project-videos/${videoFile ?? slug}.webm`}
       autoPlay={!reduceMotion}
       muted
       loop={!reduceMotion}
@@ -30,7 +41,7 @@ export function StageVideo({ slug, seekRatio = 0, className }: { slug: string; s
       onError={() => setFailed(true)}
       onLoadedMetadata={(event) => {
         const video = event.currentTarget;
-        if (seekRatio > 0 && Number.isFinite(video.duration)) {
+        if (!videoFile && seekRatio > 0 && Number.isFinite(video.duration)) {
           video.currentTime = video.duration * seekRatio;
         }
       }}

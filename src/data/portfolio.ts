@@ -5,7 +5,7 @@ export type ModeKey = "founder" | "creative" | "minimal" | "future";
 export type LanguageKey = "en" | "hi" | "te" | "ta" | "kn" | "ml" | "bn" | "mr" | "gu" | "fr" | "es" | "de" | "ja" | "ko" | "ar";
 export type ProjectInterest = "founders" | "visual" | "commerce" | "culture";
 export type StoryLayout = "cinematic" | "dashboard" | "editorial" | "journey";
-export type StoryStage = { label: string; title: string; copy: string; useVideo?: boolean };
+export type StoryStage = { label: string; title: string; copy: string; useVideo?: boolean; videoFile?: string };
 export type Story = { layout: StoryLayout; hook: string; stages: StoryStage[] };
 export type Project = {
   slug: string;
@@ -15,6 +15,7 @@ export type Project = {
   url: string;
   github: string;
   image: string;
+  embedUrl?: string;
   interests: ProjectInterest[];
   problem: string;
   solution: string;

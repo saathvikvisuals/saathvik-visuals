@@ -142,6 +142,50 @@ body {
   content: "";
   border-radius: 999px;
   background: radial-gradient(circle, var(--glow), transparent 62%);
+  pointer-events: none;
+}
+
+.entrance-card::after {
+  position: absolute;
+  inset: -30% 35% auto -10%;
+  width: 420px;
+  height: 420px;
+  content: "";
+  border-radius: 999px;
+  background: radial-gradient(circle, var(--glow), transparent 66%);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.entrance-card {
+  isolation: isolate;
+}
+
+.entrance-card-ring {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  z-index: 2;
+  background: conic-gradient(from 0deg, transparent, var(--accent), transparent 30%, transparent 60%, var(--accent), transparent);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.5;
+  animation: entrance-ring-spin 8s linear infinite;
+}
+
+@keyframes entrance-ring-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entrance-card-ring {
+    animation: none;
+  }
 }
 
 .mobile-entrance-overlay {

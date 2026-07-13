@@ -9,6 +9,7 @@ import { translations, type projects, type Story, type StoryStage } from "@/data
 import { ExperienceProvider } from "./experience-provider";
 import { CinematicBackground } from "./cinematic-background";
 import { ProjectMedia } from "./project-media";
+import { PlayEmbedReveal } from "./play-embed-reveal";
 import { getStageLayout } from "./case-study-layouts";
 import { palettes } from "@/data/palettes";
 import { useExperienceStore } from "@/store/experience-store";
@@ -106,6 +107,10 @@ function ProjectCaseStudyInner({ project }: { project: Project }) {
             <div className="absolute inset-0 bg-gradient-to-t from-black/34 via-transparent to-[color-mix(in_srgb,var(--accent)_18%,transparent)]" />
           </motion.div>
         </section>
+
+        {project.embedUrl ? (
+          <PlayEmbedReveal embedUrl={project.embedUrl} name={project.name} accent={activePalette.accent} playUrl={project.url} />
+        ) : null}
 
         <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
           <div className="case-timeline grid gap-6">
