@@ -1,1 +1,22 @@
-[]
+[
+  {
+    "slug": "just-enough",
+    "name": "Just Enough",
+    "tag": "Cinematic digital experience",
+    "type": "Visual interface concept",
+    "url": "https://saathvik-codes.itch.io/just-enough",
+    "github": "https://github.com/saathvikvisuals/just-enough",
+    "image": "/project-screenshots/just-enough.png",
+    "palette": [
+      "#7c3aed",
+      "#f5f3ff",
+      "#111827"
+    ],
+    "interests": [
+      "visual"
+    ],
+    "problem": "The existing experience needed clearer positioning, stronger visual hierarchy, and a more confident path to action.",
+    "solution": "Designed a focused digital experience with responsive UI, clear sections, visual rhythm, and interaction details that support the user journey.",
+    "outcome": "Adds a portfolio-ready case study that can be routed into the right Saathvik Visuals curation room automatically."
+  }
+]

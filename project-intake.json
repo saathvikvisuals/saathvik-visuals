@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "slug": "just-enough",
+    "name": "Just Enough",
+    "url": "https://saathvik-codes.itch.io/just-enough",
+    "github": "https://github.com/saathvikvisuals/just-enough",
+    "image": "/project-screenshots/just-enough.png",
+    "description": "Just Enough — a solo-built mobile puzzle game where the only move is removing things",
+    "tags": []
+  }
+]
