@@ -2,12 +2,15 @@ import { NextResponse } from "next/server";
 
 const NOTION_LEADS_DATA_SOURCE_ID = "4a415245-063f-444a-9a17-aa983e22228d";
 const PORTFOLIO_URL = "https://saathvik-visuals.vercel.app";
+const IG_HANDLE = "@saathvik_visuals";
 const KEYWORDS: Record<string, string> = {
-  build: `Thanks for reaching out! Here's my portfolio with full case studies: ${PORTFOLIO_URL}\n\nTell me a bit about your project (what you're building, rough timeline) and I'll follow up personally.`,
+  build: `Here's my portfolio with full case studies: ${PORTFOLIO_URL}\n\nTell me a bit about your project (what you're building, rough timeline) and I'll follow up personally.`,
   price: `Happy to talk pricing — it depends on scope. Quickest way: tell me what you're building here, or fill out the brief at ${PORTFOLIO_URL}#contact and I'll reply with a quote.`,
   portfolio: `Here's my full portfolio: ${PORTFOLIO_URL} — every project has a full case study with process, problem, and outcome.`
 };
-const DEFAULT_REPLY = `Thanks for messaging! I'll get back to you personally soon. In the meantime, here's my portfolio: ${PORTFOLIO_URL}`;
+const DEFAULT_REPLY = `Thanks for messaging! Here's my portfolio in the meantime: ${PORTFOLIO_URL}`;
+const CONFIRM_WORDS = ["done", "yes", "yep", "followed", "ok", "okay", "sure", "did"];
+const EMAIL_REGEX = /[^\s]+@[^\s]+\.[^\s]+/;
 
 // GET handles Meta's webhook verification handshake (done once when you
 // register the webhook URL in the Meta App dashboard).
@@ -31,15 +34,11 @@ export async function POST(request: Request) {
   for (const entry of body.entry) {
     for (const event of entry.messaging ?? []) {
       const senderId = event.sender?.id;
-      const text = (event.message?.text ?? "").toLowerCase().trim();
+      const rawText = event.message?.text ?? "";
+      const text = rawText.toLowerCase().trim();
       if (!senderId || !text) continue;
 
-      // Every DM gets a reply now (not just keyword matches) — a keyword
-      // gets the specific link/pitch, anything else (including just an
-      // emoji) gets a friendly acknowledgment so nobody is ignored.
-      const matchedKeyword = Object.keys(KEYWORDS).find((keyword) => text.includes(keyword));
-      await sendReply(senderId, matchedKeyword ? KEYWORDS[matchedKeyword] : DEFAULT_REPLY);
-      await logLeadToNotion({ label: `Instagram DM (${senderId})`, keyword: matchedKeyword ?? "(no keyword)", message: event.message.text, source: "Instagram" });
+      await handleDm(senderId, rawText, text);
     }
 
     for (const change of entry.changes ?? []) {
@@ -54,11 +53,163 @@ export async function POST(request: Request) {
       if (!matchedKeyword) continue;
 
       await sendPrivateReplyToComment(commentId, KEYWORDS[matchedKeyword]);
-      await logLeadToNotion({ label: `Instagram comment @${username}`, keyword: matchedKeyword, message: comment.text, source: "Instagram" });
+      await upsertLead({ label: `Instagram comment @${username}`, message: comment.text, stage: "completed", notesExtra: `Matched keyword: ${matchedKeyword}` });
     }
   }
 
   return NextResponse.json({ ok: true });
+}
+
+// Every DM runs through a small conversational funnel, state stored as a
+// "stage" tag inside the lead's own Notion row (no separate DB needed):
+//   awaiting_follow -> awaiting_contact -> completed
+// This mirrors what Instagram DM-automation tools (e.g. Zorcha) do: a
+// soft follow-gate (Meta's API can't actually verify follower status, so
+// this is an honor-system ask-then-confirm, not a real check) followed by
+// a guided name/email capture before handing over the link.
+async function handleDm(senderId: string, rawText: string, text: string) {
+  const matchedKeyword = Object.keys(KEYWORDS).find((keyword) => text.includes(keyword));
+  const existing = await findLead(senderId);
+
+  if (!existing) {
+    await upsertLead({ label: `Instagram DM (${senderId})`, message: rawText, stage: "awaiting_follow" });
+    await sendReply(senderId, `Thanks for reaching out! Quick favor before I send everything over — could you follow ${IG_HANDLE}? Reply "done" once you have and I'll send the link right away.`);
+    return;
+  }
+
+  const stage = existing.stage;
+
+  if (stage === "awaiting_follow") {
+    if (CONFIRM_WORDS.some((word) => text.includes(word))) {
+      await upsertLead({ pageId: existing.pageId, stage: "awaiting_contact" });
+      await sendReply(senderId, `Awesome, thank you! One last thing — reply with your name and email (e.g. "Priya, priya@email.com") so I can send the full portfolio and follow up personally.`);
+    } else {
+      await sendReply(senderId, `No rush — just reply "done" once you've followed ${IG_HANDLE} and I'll send everything over.`);
+    }
+    return;
+  }
+
+  if (stage === "awaiting_contact") {
+    const emailMatch = rawText.match(EMAIL_REGEX);
+    if (!emailMatch) {
+      await sendReply(senderId, `Didn't quite catch an email there — mind sending it like "Priya, priya@email.com"?`);
+      return;
+    }
+
+    const email = emailMatch[0];
+    const name = rawText.replace(email, "").replace(/[,]/g, "").trim() || "Instagram lead";
+    await upsertLead({ pageId: existing.pageId, name, email, stage: "completed" });
+    await sendReply(senderId, matchedKeyword ? KEYWORDS[matchedKeyword] : DEFAULT_REPLY);
+    return;
+  }
+
+  // stage === "completed" — already have their info, just answer normally.
+  await sendReply(senderId, matchedKeyword ? KEYWORDS[matchedKeyword] : DEFAULT_REPLY);
+}
+
+async function findLead(senderId: string): Promise<{ pageId: string; stage: string } | null> {
+  const notionKey = process.env.NOTION_API_KEY;
+  if (!notionKey) return null;
+
+  try {
+    const response = await fetch(`https://api.notion.com/v1/data_sources/${NOTION_LEADS_DATA_SOURCE_ID}/query`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${notionKey}`,
+        "Notion-Version": "2022-06-28",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        filter: { property: "Name", title: { contains: `(${senderId})` } },
+        page_size: 1
+      })
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text().catch(() => "");
+      console.error("Notion lead lookup failed:", response.status, errorBody);
+      return null;
+    }
+
+    const data = await response.json();
+    const page = data.results?.[0];
+    if (!page) return null;
+
+    const notesText: string = page.properties?.Notes?.rich_text?.[0]?.plain_text ?? "";
+    const stageMatch = notesText.match(/stage:(\w+)/);
+    return { pageId: page.id, stage: stageMatch?.[1] ?? "awaiting_follow" };
+  } catch (error) {
+    console.error("Notion lead lookup failed:", error instanceof Error ? error.message : error);
+    return null;
+  }
+}
+
+async function upsertLead({
+  pageId,
+  label,
+  message,
+  name,
+  email,
+  stage,
+  notesExtra
+}: {
+  pageId?: string;
+  label?: string;
+  message?: string;
+  name?: string;
+  email?: string;
+  stage: string;
+  notesExtra?: string;
+}) {
+  const notionKey = process.env.NOTION_API_KEY;
+  if (!notionKey) return;
+
+  const notes = [`stage:${stage}`, notesExtra].filter(Boolean).join(" — ");
+  const properties: Record<string, unknown> = {
+    Status: { status: { name: "Not started" } },
+    Notes: { rich_text: [{ text: { content: notes } }] }
+  };
+  if (label) properties.Name = { title: [{ text: { content: label } }] };
+  if (message) properties["Project Brief"] = { rich_text: [{ text: { content: message.slice(0, 2000) } }] };
+  if (email) properties.Email = { email };
+  if (name) properties["Project Brief"] = { rich_text: [{ text: { content: `Name: ${name}${message ? ` — ${message.slice(0, 1900)}` : ""}` } }] };
+
+  try {
+    if (pageId) {
+      const response = await fetch(`https://api.notion.com/v1/pages/${pageId}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${notionKey}`,
+          "Notion-Version": "2022-06-28",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ properties })
+      });
+      if (!response.ok) {
+        const errorBody = await response.text().catch(() => "");
+        console.error("Notion lead update failed:", response.status, errorBody);
+      }
+      return;
+    }
+
+    properties.Source = { select: { name: "Instagram" } };
+    properties["Date Received"] = { date: { start: new Date().toISOString() } };
+    const response = await fetch("https://api.notion.com/v1/pages", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${notionKey}`,
+        "Notion-Version": "2022-06-28",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ parent: { data_source_id: NOTION_LEADS_DATA_SOURCE_ID }, properties })
+    });
+    if (!response.ok) {
+      const errorBody = await response.text().catch(() => "");
+      console.error("Notion lead create failed:", response.status, errorBody);
+    }
+  } catch (error) {
+    console.error("Notion lead upsert failed:", error instanceof Error ? error.message : error);
+  }
 }
 
 async function sendReply(recipientId: string, text: string) {
@@ -106,39 +257,5 @@ async function sendPrivateReplyToComment(commentId: string, text: string) {
     }
   } catch (error) {
     console.error("Instagram private reply failed:", error instanceof Error ? error.message : error);
-  }
-}
-
-async function logLeadToNotion({ label, keyword, message, source }: { label: string; keyword: string; message: string; source: string }) {
-  const notionKey = process.env.NOTION_API_KEY;
-  if (!notionKey) return;
-
-  try {
-    const response = await fetch("https://api.notion.com/v1/pages", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${notionKey}`,
-        "Notion-Version": "2022-06-28",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        parent: { data_source_id: NOTION_LEADS_DATA_SOURCE_ID },
-        properties: {
-          Name: { title: [{ text: { content: label } }] },
-          "Project Brief": { rich_text: [{ text: { content: message.slice(0, 2000) } }] },
-          Source: { select: { name: source } },
-          Status: { status: { name: "Not started" } },
-          "Date Received": { date: { start: new Date().toISOString() } },
-          Notes: { rich_text: [{ text: { content: `Matched keyword: ${keyword}` } }] }
-        }
-      })
-    });
-
-    if (!response.ok) {
-      const errorBody = await response.text().catch(() => "");
-      console.error("Notion lead log failed:", response.status, errorBody);
-    }
-  } catch (error) {
-    console.error("Notion lead log failed:", error instanceof Error ? error.message : error);
   }
 }
