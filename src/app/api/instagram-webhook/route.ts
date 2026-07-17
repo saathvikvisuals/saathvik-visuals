@@ -7,6 +7,7 @@ const KEYWORDS: Record<string, string> = {
   price: `Happy to talk pricing — it depends on scope. Quickest way: tell me what you're building here, or fill out the brief at ${PORTFOLIO_URL}#contact and I'll reply with a quote.`,
   portfolio: `Here's my full portfolio: ${PORTFOLIO_URL} — every project has a full case study with process, problem, and outcome.`
 };
+const DEFAULT_REPLY = `Thanks for messaging! I'll get back to you personally soon. In the meantime, here's my portfolio: ${PORTFOLIO_URL}`;
 
 // GET handles Meta's webhook verification handshake (done once when you
 // register the webhook URL in the Meta App dashboard).
@@ -33,11 +34,12 @@ export async function POST(request: Request) {
       const text = (event.message?.text ?? "").toLowerCase().trim();
       if (!senderId || !text) continue;
 
+      // Every DM gets a reply now (not just keyword matches) — a keyword
+      // gets the specific link/pitch, anything else (including just an
+      // emoji) gets a friendly acknowledgment so nobody is ignored.
       const matchedKeyword = Object.keys(KEYWORDS).find((keyword) => text.includes(keyword));
-      if (!matchedKeyword) continue;
-
-      await sendReply(senderId, KEYWORDS[matchedKeyword]);
-      await logLeadToNotion({ label: `Instagram DM (${senderId})`, keyword: matchedKeyword, message: event.message.text, source: "Instagram" });
+      await sendReply(senderId, matchedKeyword ? KEYWORDS[matchedKeyword] : DEFAULT_REPLY);
+      await logLeadToNotion({ label: `Instagram DM (${senderId})`, keyword: matchedKeyword ?? "(no keyword)", message: event.message.text, source: "Instagram" });
     }
 
     for (const change of entry.changes ?? []) {
