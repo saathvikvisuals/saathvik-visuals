@@ -39,42 +39,54 @@ export async function POST(request: Request) {
       const text = rawText.toLowerCase().trim();
       if (!senderId || !text) continue;
 
-      await handleDm(senderId, rawText, text);
+      await runFunnel({ userId: senderId, label: `Instagram DM (${senderId})`, rawText, text, send: (message) => sendReply(senderId, message) });
     }
 
     for (const change of entry.changes ?? []) {
       if (change.field !== "comments") continue;
       const comment = change.value;
       const commentId = comment?.id;
-      const text = (comment?.text ?? "").toLowerCase().trim();
-      const username = comment?.from?.username ?? comment?.from?.id ?? "someone";
-      if (!commentId || !text) continue;
+      const commenterId = comment?.from?.id;
+      const rawText = comment?.text ?? "";
+      const text = rawText.toLowerCase().trim();
+      const username = comment?.from?.username ?? commenterId ?? "someone";
+      if (!commentId || !commenterId || !text) continue;
 
-      const matchedKeyword = Object.keys(KEYWORDS).find((keyword) => text.includes(keyword));
-      if (!matchedKeyword) continue;
-
-      await sendPrivateReplyToComment(commentId, KEYWORDS[matchedKeyword]);
-      await upsertLead({ label: `Instagram comment @${username}`, message: comment.text, stage: "completed", notesExtra: `Matched keyword: ${matchedKeyword}` });
+      // Every comment gets a reply now (matches the DM behavior) — the
+      // reply is sent as a "private reply", which opens a real DM thread.
+      // Any follow-up from this person (confirming the follow, sending
+      // name/email) arrives back through the messaging webhook below, not
+      // another comment event, so the messaging handler above picks up the
+      // rest of the funnel automatically once the thread exists.
+      await runFunnel({
+        userId: commenterId,
+        label: `Instagram comment @${username} (${commenterId})`,
+        rawText,
+        text,
+        send: (message) => sendPrivateReplyToComment(commentId, message)
+      });
     }
   }
 
   return NextResponse.json({ ok: true });
 }
 
-// Every DM runs through a small conversational funnel, state stored as a
-// "stage" tag inside the lead's own Notion row (no separate DB needed):
-//   awaiting_follow -> awaiting_contact -> completed
-// This mirrors what Instagram DM-automation tools (e.g. Zorcha) do: a
-// soft follow-gate (Meta's API can't actually verify follower status, so
-// this is an honor-system ask-then-confirm, not a real check) followed by
-// a guided name/email capture before handing over the link.
-async function handleDm(senderId: string, rawText: string, text: string) {
+// Every DM or comment runs through the same small conversational funnel,
+// state stored as a "stage" tag inside the lead's own Notion row (no
+// separate DB needed): awaiting_follow -> awaiting_contact -> completed.
+// This mirrors what Instagram DM-automation tools (e.g. Zorcha) do: a soft
+// follow-gate (Meta's API can't actually verify follower status, so this
+// is an honor-system ask-then-confirm, not a real check) followed by a
+// guided name/email capture before handing over the link. `send` abstracts
+// over the two different reply mechanisms (DM send vs. comment private
+// reply) so both surfaces share one funnel implementation.
+async function runFunnel({ userId, label, rawText, text, send }: { userId: string; label: string; rawText: string; text: string; send: (message: string) => Promise<void> }) {
   const matchedKeyword = Object.keys(KEYWORDS).find((keyword) => text.includes(keyword));
-  const existing = await findLead(senderId);
+  const existing = await findLead(userId);
 
   if (!existing) {
-    await upsertLead({ label: `Instagram DM (${senderId})`, message: rawText, stage: "awaiting_follow" });
-    await sendReply(senderId, `Thanks for reaching out! Quick favor before I send everything over — could you follow ${IG_HANDLE}? Reply "done" once you have and I'll send the link right away.`);
+    await upsertLead({ label, message: rawText, stage: "awaiting_follow" });
+    await send(`Thanks for reaching out! Quick favor before I send everything over — could you follow ${IG_HANDLE}? Reply "done" once you have and I'll send the link right away.`);
     return;
   }
 
@@ -83,9 +95,9 @@ async function handleDm(senderId: string, rawText: string, text: string) {
   if (stage === "awaiting_follow") {
     if (CONFIRM_WORDS.some((word) => text.includes(word))) {
       await upsertLead({ pageId: existing.pageId, stage: "awaiting_contact" });
-      await sendReply(senderId, `Awesome, thank you! One last thing — reply with your name and email (e.g. "Priya, priya@email.com") so I can send the full portfolio and follow up personally.`);
+      await send(`Awesome, thank you! One last thing — reply with your name and email (e.g. "Priya, priya@email.com") so I can send the full portfolio and follow up personally.`);
     } else {
-      await sendReply(senderId, `No rush — just reply "done" once you've followed ${IG_HANDLE} and I'll send everything over.`);
+      await send(`No rush — just reply "done" once you've followed ${IG_HANDLE} and I'll send everything over.`);
     }
     return;
   }
@@ -93,19 +105,19 @@ async function handleDm(senderId: string, rawText: string, text: string) {
   if (stage === "awaiting_contact") {
     const emailMatch = rawText.match(EMAIL_REGEX);
     if (!emailMatch) {
-      await sendReply(senderId, `Didn't quite catch an email there — mind sending it like "Priya, priya@email.com"?`);
+      await send(`Didn't quite catch an email there — mind sending it like "Priya, priya@email.com"?`);
       return;
     }
 
     const email = emailMatch[0];
     const name = rawText.replace(email, "").replace(/[,]/g, "").trim() || "Instagram lead";
     await upsertLead({ pageId: existing.pageId, name, email, stage: "completed" });
-    await sendReply(senderId, matchedKeyword ? KEYWORDS[matchedKeyword] : DEFAULT_REPLY);
+    await send(matchedKeyword ? KEYWORDS[matchedKeyword] : DEFAULT_REPLY);
     return;
   }
 
   // stage === "completed" — already have their info, just answer normally.
-  await sendReply(senderId, matchedKeyword ? KEYWORDS[matchedKeyword] : DEFAULT_REPLY);
+  await send(matchedKeyword ? KEYWORDS[matchedKeyword] : DEFAULT_REPLY);
 }
 
 async function findLead(senderId: string): Promise<{ pageId: string; stage: string } | null> {
