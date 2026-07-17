@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 const NOTION_LEADS_DATA_SOURCE_ID = "4a415245-063f-444a-9a17-aa983e22228d";
+const NOTION_LEADS_DATABASE_ID = "ee34c710-0786-4a01-b351-63627ef436fb";
 const PORTFOLIO_URL = "https://saathvik-visuals.vercel.app";
 const IG_HANDLE = "@saathvik_visuals";
 const KEYWORDS: Record<string, string> = {
@@ -112,7 +113,11 @@ async function findLead(senderId: string): Promise<{ pageId: string; stage: stri
   if (!notionKey) return null;
 
   try {
-    const response = await fetch(`https://api.notion.com/v1/data_sources/${NOTION_LEADS_DATA_SOURCE_ID}/query`, {
+    // The newer /v1/data_sources/{id}/query endpoint doesn't exist at this
+    // API version — confirmed via direct testing (400 invalid_request_url).
+    // The classic /v1/databases/{database_id}/query endpoint is what
+    // actually works with Notion-Version 2022-06-28.
+    const response = await fetch(`https://api.notion.com/v1/databases/${NOTION_LEADS_DATABASE_ID}/query`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${notionKey}`,
