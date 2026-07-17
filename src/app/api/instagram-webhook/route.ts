@@ -64,7 +64,11 @@ async function sendReply(recipientId: string, text: string) {
   if (!token) return;
 
   try {
-    const response = await fetch(`https://graph.facebook.com/v21.0/me/messages?access_token=${token}`, {
+    // graph.instagram.com, not graph.facebook.com — this Instagram API with
+    // Instagram Login token type (prefix "IGAA") only authenticates against
+    // the Instagram-specific host, confirmed via direct testing (the
+    // Facebook host returns a token-parsing error, not an API-level error).
+    const response = await fetch(`https://graph.instagram.com/v21.0/me/messages?access_token=${token}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ recipient: { id: recipientId }, message: { text } })
@@ -87,7 +91,8 @@ async function sendPrivateReplyToComment(commentId: string, text: string) {
     // Instagram's "private reply" API sends a DM to whoever left the
     // comment, referencing that comment as the conversation starter — this
     // is what powers the classic "comment a keyword, get a DM" flow.
-    const response = await fetch(`https://graph.facebook.com/v21.0/${commentId}/private_replies?access_token=${token}`, {
+    // graph.instagram.com, not graph.facebook.com — see note in sendReply().
+    const response = await fetch(`https://graph.instagram.com/v21.0/${commentId}/private_replies?access_token=${token}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: text })
