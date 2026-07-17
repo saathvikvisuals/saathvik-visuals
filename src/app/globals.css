@@ -159,6 +159,21 @@ body {
 
 .entrance-card {
   isolation: isolate;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.entrance-card::-webkit-scrollbar {
+  display: none;
+}
+
+.entrance-overlay {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.entrance-overlay::-webkit-scrollbar {
+  display: none;
 }
 
 .entrance-card-ring {

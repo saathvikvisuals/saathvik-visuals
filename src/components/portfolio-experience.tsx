@@ -1408,7 +1408,7 @@ function ClientExperience() {
         {reviews.length === 0 ? (
           <div className="glass mt-9 rounded-[2rem] p-10 text-center">
             <p className="m-0 text-lg leading-7 text-[var(--muted)]">
-              Client reviews are on the way — every one shown here will be a real response from someone Saathvik has built for.
+              New studio, growing fast — the first client reviews will be landing here soon.
             </p>
           </div>
         ) : (
@@ -1670,10 +1670,19 @@ function CustomCursor() {
   useEffect(() => {
     const dot = dotRef.current;
     if (!dot) return;
-    gsap.set(dot, { xPercent: -50, yPercent: -50, x: window.innerWidth / 2, y: window.innerHeight / 2, scale: 0.75 });
+    // scaleX/scaleY (not the "scale" shorthand) — GSAP's CSSPlugin warns
+    // "scale not eligible for reset" and does extra reconciliation work every
+    // tick when driving the shorthand at 60fps, since the browser now treats
+    // `scale` as its own CSS property separate from `transform`.
+    gsap.set(dot, { xPercent: -50, yPercent: -50, x: window.innerWidth / 2, y: window.innerHeight / 2, scaleX: 0.75, scaleY: 0.75 });
     const moveX = gsap.quickTo(dot, "x", { duration: 0.5, ease: "power3" });
     const moveY = gsap.quickTo(dot, "y", { duration: 0.5, ease: "power3" });
-    const moveScale = gsap.quickTo(dot, "scale", { duration: 0.4, ease: "power2" });
+    const moveScaleX = gsap.quickTo(dot, "scaleX", { duration: 0.4, ease: "power2" });
+    const moveScaleY = gsap.quickTo(dot, "scaleY", { duration: 0.4, ease: "power2" });
+    const moveScale = (value: number) => {
+      moveScaleX(value);
+      moveScaleY(value);
+    };
 
     function move(event: PointerEvent) {
       moveX(event.clientX);

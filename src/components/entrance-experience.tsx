@@ -5,14 +5,15 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Check } from "lucide-react";
 import { modes, type ModeKey } from "@/data/portfolio";
-import { type InterestKey, useExperienceStore } from "@/store/experience-store";
+import { useExperienceStore } from "@/store/experience-store";
 import { cn } from "@/lib/utils";
-import { curationQuestions, deriveCurationResult, type AnswerKey, type CurationChoice, type CurationResult, type DepthKey } from "@/lib/curation";
+import { curationQuestions, deriveCurationResult, type AnswerKey, type CurationChoice, type CurationResult } from "@/lib/curation";
 
 type Phase = "welcome" | "concept" | "questions" | "compose" | "entering";
 
-const WELCOME_MS = 1200;
-const COMPOSE_MS = 700;
+const WELCOME_MS = 2800;
+const CONCEPT_MS = 20000;
+const COMPOSE_MS = 1500;
 const ENTER_MS = 1200;
 
 export function EntranceExperience() {
@@ -34,33 +35,11 @@ export function EntranceExperience() {
     const updateMobile = () => setIsMobile(media.matches);
     updateMobile();
     media.addEventListener("change", updateMobile);
-    const forceIntro = new URLSearchParams(window.location.search).has("intro");
-    // Session-scoped on purpose: the curation quiz should ask again on every
-    // new visit (new tab/window, or after the browser closes), not just once
-    // ever — it only stays quiet across in-session route changes/refreshes.
-    const saved = sessionStorage.getItem("sv-curation");
-
-    if (forceIntro) {
-      sessionStorage.removeItem("sv-entrance-seen");
-      setCurated(false);
-      setPhase("welcome");
-      setOpen(true);
-    } else if (saved) {
-      try {
-        const parsed = JSON.parse(saved) as { mode?: ModeKey; interest?: InterestKey; depth?: DepthKey; signature?: string };
-        if (parsed.mode) setMode(parsed.mode);
-        if (parsed.interest) setInterest(parsed.interest);
-        if (parsed.depth) setDepth(parsed.depth);
-        if (parsed.signature) setCurationSignature(parsed.signature);
-        setCurated(true);
-      } catch {
-        sessionStorage.removeItem("sv-curation");
-        setOpen(true);
-      }
-    } else {
-      setCurated(false);
-      setOpen(true);
-    }
+    // Every load of this page (including a plain refresh) re-opens the
+    // curation quiz from the first screen — visitors asked to be able to
+    // redo it any time, not just on a brand-new tab.
+    setCurated(false);
+    setOpen(true);
 
     const timer = window.setTimeout(() => setPhase("concept"), WELCOME_MS);
     return () => {
@@ -68,6 +47,14 @@ export function EntranceExperience() {
       media.removeEventListener("change", updateMobile);
     };
   }, [setCurated, setCurationSignature, setDepth, setInterest, setMode]);
+
+  useEffect(() => {
+    if (phase !== "concept") return;
+    // Gives visitors time to actually read the explanation before the quiz
+    // starts, without depending on them finding/clicking a button.
+    const timer = window.setTimeout(() => setPhase("questions"), CONCEPT_MS);
+    return () => window.clearTimeout(timer);
+  }, [phase]);
 
   const result = useMemo(() => deriveCurationResult(answers), [answers]);
   const activeQuestion = curationQuestions[step];
@@ -177,20 +164,31 @@ export function EntranceExperience() {
 function WelcomeScreen() {
   return (
     <motion.div key="welcome" className="grid min-h-[460px] place-items-center text-center" exit={{ opacity: 0, scale: 0.96 }}>
-      <div>
-        <motion.div className="relative mx-auto grid h-56 w-56 place-items-center" animate={{ scale: [1, 1.035, 1] }} transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}>
-          <motion.div className="absolute inset-0" initial={{ opacity: 0 }} animate={{ opacity: 0.85 }} transition={{ duration: 1.2 }}>
-            <Image className="object-contain" src="/illus-2.png" alt="" fill priority aria-hidden />
+      <div className="relative">
+        <motion.div
+          className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[26rem] w-[26rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
+          style={{ background: "radial-gradient(circle, var(--glow) 0%, transparent 70%)" }}
+          initial={{ opacity: 0, scale: 0.7 }}
+          animate={{ opacity: [0.25, 0.45, 0.25], scale: [0.9, 1.05, 0.9] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="relative mx-auto grid h-40 w-40 place-items-center sm:h-52 sm:w-52"
+          animate={{ scale: [1, 1.035, 1], rotate: [0, 1.5, 0, -1.5, 0] }}
+          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <motion.div className="absolute inset-0" initial={{ opacity: 0, scale: 1.1 }} animate={{ opacity: 0.9, scale: 1 }} transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}>
+            <Image className="object-contain" src="/illus-2.png" alt="" fill priority sizes="(max-width: 640px) 10rem, 13rem" aria-hidden />
           </motion.div>
-          <Image className="relative z-10 rounded-[1.55rem] shadow-2xl" src="/brand-favicon.png" alt="Saathvik Visuals" width={88} height={88} priority />
-          <motion.span className="absolute inset-8 rounded-[2rem] border border-[var(--accent)]/10" animate={{ rotate: [0, 5, 0], scale: [0.88, 1.22, 0.88], opacity: [0.18, 0.5, 0.18] }} transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }} />
+          <Image className="relative z-10 rounded-[1.55rem] shadow-2xl" src="/brand-favicon.png" alt="Saathvik Visuals" width={72} height={72} priority />
+          <motion.span className="absolute inset-6 rounded-[2rem] border border-[var(--accent)]/10 sm:inset-8" animate={{ rotate: [0, 5, 0], scale: [0.88, 1.22, 0.88], opacity: [0.18, 0.5, 0.18] }} transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }} />
         </motion.div>
         <motion.p className="mt-9 text-xs font-black uppercase tracking-[0.34em] text-[var(--muted)]" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45, duration: 1 }}>
           Welcome to Saathvik Visuals
         </motion.p>
-        <motion.h1 className="mx-auto mt-4 max-w-xl font-[var(--font-libre)] text-5xl font-normal leading-[0.96] text-[var(--ink)] sm:text-7xl" initial={{ opacity: 0, y: 24, filter: "blur(12px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={{ delay: 0.9, duration: 1.4, ease: [0.16, 1, 0.3, 1] }}>
+        <motion.p className="mx-auto mt-4 max-w-xl font-[var(--font-libre)] text-5xl font-normal leading-[0.96] text-[var(--ink)] sm:text-7xl" initial={{ opacity: 0, y: 24, filter: "blur(12px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={{ delay: 0.9, duration: 1.4, ease: [0.16, 1, 0.3, 1] }}>
           Let the room build itself.
-        </motion.h1>
+        </motion.p>
         <motion.div className="mx-auto mt-10 h-1 w-48 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--ink)_14%,transparent)]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4, duration: 0.8 }}>
           <motion.span className="block h-full rounded-full bg-[var(--accent)]" initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ delay: 1.6, duration: 3.1, ease: "easeInOut" }} />
         </motion.div>
@@ -209,43 +207,50 @@ function ConceptScreen({ onContinue }: { onContinue: () => void }) {
   const roomKeys = Object.keys(modes) as ModeKey[];
 
   return (
-    <motion.div key="concept" className="grid min-h-[460px] place-items-center text-center" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96 }}>
+    <motion.div key="concept" className="grid min-h-[380px] place-items-center text-center" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96 }}>
       <div className="mx-auto max-w-lg">
         <motion.div
-          className="relative mx-auto h-40 w-40 sm:h-48 sm:w-48"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: [0.97, 1.02, 0.97] }}
-          transition={{ opacity: { duration: 0.6 }, scale: { duration: 4.2, repeat: Infinity, ease: "easeInOut" } }}
+          className="relative mx-auto h-20 w-20 sm:h-24 sm:w-24"
+          initial={{ opacity: 0, scale: 0.9, y: -6 }}
+          animate={{ opacity: 1, scale: [0.97, 1.03, 0.97], y: [-6, 4, -6] }}
+          transition={{ opacity: { duration: 0.6 }, scale: { duration: 5, repeat: Infinity, ease: "easeInOut" }, y: { duration: 5, repeat: Infinity, ease: "easeInOut" } }}
         >
-          <Image className="object-contain" src="/illus-1.png" alt="Four glowing doorways converging into one" fill priority />
+          <Image className="object-contain drop-shadow-[0_20px_60px_var(--glow)]" src="/illus-1.png" alt="Four glowing doorways converging into one" fill priority sizes="(max-width: 640px) 10rem, 12rem" />
         </motion.div>
-        <motion.p className="mt-9 text-xs font-black uppercase tracking-[0.34em] text-[var(--accent)]" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+        <motion.p className="mt-5 text-xs font-black uppercase tracking-[0.34em] text-[var(--accent)]" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           Before you answer anything
         </motion.p>
-        <motion.h2 className="mode-font mt-4 text-3xl font-black leading-tight text-[var(--ink)] sm:text-4xl" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+        <motion.h2 className="mode-font mt-3 text-2xl font-black leading-tight text-[var(--ink)] sm:text-3xl" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
           Every visitor gets a different room.
         </motion.h2>
-        <motion.p className="mx-auto mt-4 max-w-md text-sm leading-7 text-[var(--muted)]" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+        <motion.p className="mx-auto mt-3 max-w-md text-sm leading-6 text-[var(--muted)]" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
           This isn&rsquo;t one fixed site — it&rsquo;s rebuilt around you. Three quick questions decide which &ldquo;room&rdquo; you land in: the project order, the visual tone, and which case studies come first all change based on your answers.
         </motion.p>
-        <motion.div className="mx-auto mt-6 flex flex-wrap items-center justify-center gap-2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }}>
+        <motion.div className="mx-auto mt-4 flex flex-wrap items-center justify-center gap-2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }}>
           {roomKeys.map((key) => (
             <span key={key} className="rounded-full border border-[var(--line)] px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em]" style={{ color: modes[key].accent }}>
               {modes[key].label} room
             </span>
           ))}
         </motion.div>
-        <motion.button
-          className="mt-9 inline-flex items-center gap-2 rounded-full bg-[var(--accent)] px-7 py-3 text-sm font-black text-white shadow-[0_10px_40px_-8px_var(--glow)]"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.65, type: "spring", damping: 18, stiffness: 200 }}
-          whileHover={{ scale: 1.05, boxShadow: "0 14px 50px -6px var(--glow)" }}
-          whileTap={{ scale: 0.96 }}
-          onClick={onContinue}
-        >
-          Show me my room <ArrowRight size={16} />
-        </motion.button>
+        <motion.div className="mx-auto mt-5 flex flex-col items-center gap-3" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65 }}>
+          <motion.button
+            className="inline-flex items-center gap-2 rounded-full bg-[var(--accent)] px-7 py-3 text-sm font-black text-white shadow-[0_10px_40px_-8px_var(--glow)]"
+            whileHover={{ scale: 1.05, boxShadow: "0 14px 50px -6px var(--glow)" }}
+            whileTap={{ scale: 0.96 }}
+            onClick={onContinue}
+          >
+            Show me my room <ArrowRight size={16} />
+          </motion.button>
+          <div className="relative h-1 w-40 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--ink)_14%,transparent)]">
+            <motion.span
+              className="block h-full rounded-full bg-[var(--accent)]"
+              initial={{ width: "0%" }}
+              animate={{ width: "100%" }}
+              transition={{ duration: CONCEPT_MS / 1000, ease: "linear" }}
+            />
+          </div>
+        </motion.div>
       </div>
     </motion.div>
   );

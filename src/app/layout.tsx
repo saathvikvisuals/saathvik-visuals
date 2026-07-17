@@ -80,21 +80,12 @@ export const metadata: Metadata = {
     siteName: "Saathvik Visuals",
     title: "Saathvik Visuals | Trusted UI/UX & Product Designer",
     description: SITE_DESCRIPTION,
-    locale: "en_US",
-    images: [
-      {
-        url: "/brand-favicon.png",
-        width: 512,
-        height: 512,
-        alt: "Saathvik Visuals"
-      }
-    ]
+    locale: "en_US"
   },
   twitter: {
     card: "summary_large_image",
     title: "Saathvik Visuals | Trusted UI/UX & Product Designer",
-    description: SITE_DESCRIPTION,
-    images: ["/brand-favicon.png"]
+    description: SITE_DESCRIPTION
   }
 };
 
@@ -114,11 +105,39 @@ const personJsonLd = {
   ]
 };
 
+const serviceJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  name: "Saathvik Visuals",
+  image: `${SITE_URL}/brand-favicon.png`,
+  url: SITE_URL,
+  description: SITE_DESCRIPTION,
+  priceRange: "$$",
+  founder: {
+    "@type": "Person",
+    name: "Saathvik Kalepu"
+  },
+  areaServed: "Worldwide",
+  serviceType: ["UI/UX Design", "Product Design", "Web Design", "Mobile App Design", "Full-Stack SaaS Development"],
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "sales",
+    email: "saathvikk202@gmail.com",
+    url: `${SITE_URL}#contact`
+  },
+  sameAs: [
+    "https://github.com/saathvikvisuals",
+    "https://www.linkedin.com/in/saathvik-kalepu-17041228b/",
+    "https://www.instagram.com/sunny__fr18/"
+  ]
+};
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${raleway.variable} ${libreFranklin.variable} ${instrument.variable} ${caveat.variable}`} suppressHydrationWarning>
       <body suppressHydrationWarning>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }} />
         {children}
       </body>
     </html>

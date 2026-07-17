@@ -11,6 +11,42 @@ type ContactPayload = {
 
 let transporter: nodemailer.Transporter | null = null;
 
+const NOTION_LEADS_DATA_SOURCE_ID = "4a415245-063f-444a-9a17-aa983e22228d";
+
+async function logLeadToNotion({ name, email, message }: { name: string; email: string; message: string }) {
+  const notionKey = process.env.NOTION_API_KEY;
+  if (!notionKey) return;
+
+  try {
+    const response = await fetch("https://api.notion.com/v1/pages", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${notionKey}`,
+        "Notion-Version": "2022-06-28",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        parent: { data_source_id: NOTION_LEADS_DATA_SOURCE_ID },
+        properties: {
+          Name: { title: [{ text: { content: name } }] },
+          Email: { email },
+          "Project Brief": { rich_text: [{ text: { content: message.slice(0, 2000) } }] },
+          Source: { select: { name: "Contact Form" } },
+          Status: { status: { name: "Not started" } },
+          "Date Received": { date: { start: new Date().toISOString() } }
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const body = await response.text().catch(() => "");
+      console.error("Notion lead log failed:", response.status, body);
+    }
+  } catch (error) {
+    console.error("Notion lead log failed:", error instanceof Error ? error.message : error);
+  }
+}
+
 function getTransporter() {
   if (!process.env.SMTP_HOST || !process.env.SMTP_PORT || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
     return null;
@@ -40,6 +76,8 @@ export async function POST(request: Request) {
   if (name.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || message.length < 10) {
     return NextResponse.json({ message: "Please enter your name, a valid email, and at least 10 characters about the project." }, { status: 400 });
   }
+
+  await logLeadToNotion({ name, email, message });
 
   const mailer = getTransporter();
 
