@@ -180,7 +180,7 @@ function WelcomeScreen() {
           <motion.div className="absolute inset-0" initial={{ opacity: 0, scale: 1.1 }} animate={{ opacity: 0.9, scale: 1 }} transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}>
             <Image className="object-contain" src="/illus-2.png" alt="" fill priority sizes="(max-width: 640px) 10rem, 13rem" aria-hidden />
           </motion.div>
-          <Image className="relative z-10 rounded-[1.55rem] shadow-2xl" src="/brand-favicon.png" alt="Saathvik Visuals" width={72} height={72} priority />
+          <Image className="entrance-logo-icon relative z-10 rounded-[1.55rem] shadow-2xl" src="/brand-favicon.png" alt="Saathvik Visuals" width={72} height={72} priority />
           <motion.span className="absolute inset-6 rounded-[2rem] border border-[var(--accent)]/10 sm:inset-8" animate={{ rotate: [0, 5, 0], scale: [0.88, 1.22, 0.88], opacity: [0.18, 0.5, 0.18] }} transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }} />
         </motion.div>
         <motion.p className="mt-9 text-xs font-black uppercase tracking-[0.34em] text-[var(--muted)]" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45, duration: 1 }}>
@@ -261,7 +261,7 @@ function QuestionScreen({ question, answer, onSelect }: { question: (typeof cura
     <motion.div key={question.key} className="min-h-[460px]" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -18 }}>
       <div className="grid gap-8 lg:grid-cols-[0.74fr_1.26fr] lg:items-end">
         <div>
-          <Image className="rounded-[1.1rem]" src="/brand-favicon.png" alt="Saathvik Visuals" width={58} height={58} priority />
+          <Image className="entrance-logo-icon rounded-[1.1rem]" src="/brand-favicon.png" alt="Saathvik Visuals" width={58} height={58} priority />
           <p className="mt-8 text-xs font-black uppercase tracking-[0.32em] text-[var(--accent)]">{question.eyebrow}</p>
           <h2 className="mode-font mt-3 max-w-2xl text-4xl font-black leading-none text-[var(--ink)] sm:text-6xl">{question.title}</h2>
           <p className="mt-5 max-w-md text-sm leading-6 text-[var(--muted)]">Each answer changes the room, project order, visual mode, and first impression.</p>
@@ -330,7 +330,7 @@ function EnteringScreen({ result }: { result: CurationResult }) {
     >
       <div>
         <div className="relative mx-auto grid h-24 w-24 place-items-center">
-          <Image className="rounded-[1.25rem] shadow-2xl" src="/brand-favicon.png" alt="Saathvik Visuals" width={78} height={78} priority />
+          <Image className="entrance-logo-icon rounded-[1.25rem] shadow-2xl" src="/brand-favicon.png" alt="Saathvik Visuals" width={78} height={78} priority />
           <motion.span
             className="absolute -inset-4 rounded-[1.8rem] border border-[var(--accent)]/10"
             animate={{ rotate: 360, scale: [0.96, 1.08, 0.96] }}

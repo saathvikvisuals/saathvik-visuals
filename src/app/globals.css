@@ -247,7 +247,11 @@ body {
   border-radius: 1.05rem !important;
 }
 
-.mobile-entrance-card img {
+/* Scoped to the small logo icons only (not fill-based illustrations like
+   illus-1/illus-2) — forcing a fixed pixel size on a Next.js `fill` image
+   breaks its absolute-fill layout, splitting it into a disconnected square
+   that visually overlaps the logo instead of sitting behind it. */
+.mobile-entrance-card img.entrance-logo-icon {
   width: 50px !important;
   height: 50px !important;
   border-radius: 0.85rem !important;
