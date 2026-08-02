@@ -29,6 +29,7 @@ import {
   X
 } from "lucide-react";
 import { languageOptions, modes, process, projects, socialLinks, testimonials, translations, type LanguageKey, type ModeKey } from "@/data/portfolio";
+import { services } from "@/data/services";
 import { palettes, paletteKeys } from "@/data/palettes";
 import { cn } from "@/lib/utils";
 import { roomForInterest, type DepthKey } from "@/lib/curation";
@@ -37,8 +38,10 @@ import { CinematicBackground } from "./cinematic-background";
 import { ExperienceProvider } from "./experience-provider";
 import { ProjectMedia } from "./project-media";
 import { AmbientVideoBackdrop } from "./ambient-video-backdrop";
+import { ProcessArt } from "./visuals/process-art";
 import Link from "next/link";
 import { EntranceExperience } from "./entrance-experience";
+import { ContactEstimator } from "./contact-estimator";
 
 export function PortfolioExperience() {
   const [mounted, setMounted] = useState(false);
@@ -59,11 +62,12 @@ export function PortfolioExperience() {
       <main className={cn("relative z-10 transition duration-700", !curated && "pointer-events-none blur-[2px] opacity-35")} data-depth={depth} data-curation={curationSignature}>
         <TopNav />
         <Hero />
+        <ServicesBand />
         <Philosophy />
         <ProjectShowcase />
         <ClientExperience />
         <Process />
-        <Contact />
+        <EstimatePreview />
         <Footer />
         <CustomCursor />
       </main>
@@ -96,7 +100,7 @@ const curationProfiles: Record<InterestKey, { kicker: string; headline: string; 
   founders: {
     kicker: "Business proof",
     headline: "Proof Room",
-    subhead: "A portfolio version focused on clarity, trust, conversion, and product decisions.",
+    subhead: "A studio version focused on clarity, trust, conversion, and product decisions.",
     selected: "Founder Selection",
     projectLine: "Projects arranged around business confidence, launch value, and decision-ready interfaces.",
     philosophy: "This version gives founders the shortest path to proof: what problem was understood, what system was built, and why the interface can support a business outcome."
@@ -104,7 +108,7 @@ const curationProfiles: Record<InterestKey, { kicker: string; headline: string; 
   visual: {
     kicker: "Visual worlds",
     headline: "Motion Room",
-    subhead: "A portfolio version focused on cinematic composition, mood, motion, and memorable UI systems.",
+    subhead: "A studio version focused on cinematic composition, mood, motion, and memorable UI systems.",
     selected: "Visual Selection",
     projectLine: "Projects arranged around atmosphere, interaction rhythm, and brand memory.",
     philosophy: "This version treats every project like a designed world: typography, motion, image direction, and interface hierarchy work together before the visitor reads a paragraph."
@@ -112,7 +116,7 @@ const curationProfiles: Record<InterestKey, { kicker: string; headline: string; 
   commerce: {
     kicker: "Buying flows",
     headline: "Flow Room",
-    subhead: "A portfolio version focused on service clarity, shopping confidence, booking, and responsive UX.",
+    subhead: "A studio version focused on service clarity, shopping confidence, booking, and responsive UX.",
     selected: "Commerce Selection",
     projectLine: "Projects arranged around browsing, trust, product/service selection, and action.",
     philosophy: "This version is built for clients who need the interface to reduce hesitation: clear services, guided choices, proof, and frictionless action."
@@ -120,7 +124,7 @@ const curationProfiles: Record<InterestKey, { kicker: string; headline: string; 
   culture: {
     kicker: "Culture systems",
     headline: "Story Room",
-    subhead: "A portfolio version focused on heritage, travel, music, identity, and editorial product storytelling.",
+    subhead: "A studio version focused on heritage, travel, music, identity, and editorial product storytelling.",
     selected: "Culture Selection",
     projectLine: "Projects arranged around emotion, context, cultural depth, and story-led navigation.",
     philosophy: "This version presents design as a cultural system: every visual decision supports memory, place, sound, identity, and audience belonging."
@@ -219,7 +223,7 @@ const localizedPageCopy: Partial<Record<LanguageKey, PageCopy>> = {
     footerText: "Saathvik Visuals - UI/UX, cinematic interfaces, product concepts, and story-led digital experiences.",
     socialProfessional: "Professional updates",
     socialSource: "Project source",
-    socialBrief: "Start a project brief",
+    socialBrief: "Start a quotation brief",
     processItems: process
   },
   hi: {
@@ -588,10 +592,11 @@ function MobileNavMenu() {
   const links = [
     { href: "work", label: `01 ${t.navWork}` },
     { href: "process", label: `02 ${t.navProcess}` },
-    { href: "contact", label: `03 ${t.navContact}` }
+    { href: "/contact", label: `03 ${t.navContact}` }
   ];
 
   const handleClick = (event: MouseEvent<HTMLAnchorElement>, id: string) => {
+    if (id.startsWith("/")) return;
     setOpen(false);
     scrollToSection(event, id);
   };
@@ -621,7 +626,7 @@ function MobileNavMenu() {
                 <a
                   key={link.href}
                   className="rounded-xl px-3 py-3 hover:bg-[color-mix(in_srgb,var(--ink)_10%,transparent)] hover:text-[var(--accent)]"
-                  href={`#${link.href}`}
+                  href={link.href.startsWith("/") ? link.href : `#${link.href}`}
                   onClick={(event) => handleClick(event, link.href)}
                 >
                   {link.label}
@@ -651,7 +656,7 @@ function TopNav() {
         <div className="hidden items-center gap-1 text-[0.66rem] font-black uppercase text-[var(--muted)] md:flex">
           <a className="rounded-full px-3 py-2 hover:bg-[color-mix(in_srgb,var(--ink)_10%,transparent)] hover:text-[var(--accent)]" href="#work" onClick={(event) => scrollToSection(event, "work")}>01 {t.navWork}</a>
           <a className="rounded-full px-3 py-2 hover:bg-[color-mix(in_srgb,var(--ink)_10%,transparent)] hover:text-[var(--accent)]" href="#process" onClick={(event) => scrollToSection(event, "process")}>02 {t.navProcess}</a>
-          <a className="rounded-full px-3 py-2 hover:bg-[color-mix(in_srgb,var(--ink)_10%,transparent)] hover:text-[var(--accent)]" href="#contact" onClick={(event) => scrollToSection(event, "contact")}>03 {t.navContact}</a>
+          <Link className="rounded-full px-3 py-2 hover:bg-[color-mix(in_srgb,var(--ink)_10%,transparent)] hover:text-[var(--accent)]" href="/contact">03 {t.navContact}</Link>
         </div>
         <div className="flex items-center gap-1.5 sm:gap-2">
           <PaletteMenu />
@@ -723,7 +728,7 @@ function NarrationButton() {
     <button
       className="audio-narration-trigger magnetic grid h-10 w-10 place-items-center rounded-full border hairline bg-[var(--card)] text-[var(--ink)]"
       onClick={toggleNarration}
-      aria-label={speaking ? "Stop narrated portfolio summary" : "Play narrated portfolio summary"}
+      aria-label={speaking ? "Stop narrated studio summary" : "Play narrated studio summary"}
       title={speaking ? "Stop guide" : `${t.language} audio guide`}
     >
       {speaking ? <VolumeX size={17} className="text-[var(--accent)]" /> : <Volume2 size={17} />}
@@ -792,14 +797,14 @@ function createNarrationUtterance({
     minimal: "The visual mode is editorial, light, and direct.",
     future: "The visual mode feels like a modern product launch with depth and movement."
   };
-  const english = `Welcome to ${room}. This curated Saathvik Visuals portfolio is shaped around ${projectFocus[interest]}. ${depthLine[depth]} ${modeLine[mode]} You can explore the featured work, open individual case studies, review the design process, and start a project brief from the contact section. Your selection path is ${signature.replaceAll(":", ", ")}.`;
+  const english = `Welcome to ${room}. This curated Saathvik Visuals studio is shaped around ${projectFocus[interest]}. ${depthLine[depth]} ${modeLine[mode]} You can explore the featured work, open individual case studies, review the design process, and start a quotation brief from the contact section. Your selection path is ${signature.replaceAll(":", ", ")}.`;
   const localized: Partial<Record<LanguageKey, string>> = {
-    hi: `Saathvik Visuals mein swagat hai. Yeh ${room} version ${projectFocus[interest]} par focus karta hai. ${depthLine[depth]} Aap featured work dekh sakte hain, case studies khol sakte hain, process samajh sakte hain, aur contact section se paid project brief start kar sakte hain.`,
-    te: `Saathvik Visuals ki welcome. Ee ${room} version ${projectFocus[interest]} meeda focus chestundi. ${depthLine[depth]} Meeru featured work choodachu, case studies open cheyyachu, process ardham chesukovachu, contact section lo project brief start cheyyachu.`,
-    ta: `Saathvik Visuals ku welcome. Indha ${room} version ${projectFocus[interest]} mela focus pannum. ${depthLine[depth]} Neenga featured work paakalaam, case studies open pannalaam, process purinjukalaam, contact section la project brief start pannalaam.`,
-    fr: `Bienvenue dans ${room}. Cette version de Saathvik Visuals est organisee autour de ${projectFocus[interest]}. ${depthLine[depth]} Vous pouvez voir les projets, ouvrir les etudes de cas, comprendre le processus, puis demarrer un brief projet depuis la section contact.`,
-    es: `Bienvenido a ${room}. Esta version de Saathvik Visuals esta curada alrededor de ${projectFocus[interest]}. ${depthLine[depth]} Puedes explorar los trabajos, abrir casos de estudio, revisar el proceso y enviar un brief de proyecto desde contacto.`,
-    de: `Willkommen in ${room}. Diese Version von Saathvik Visuals ist auf ${projectFocus[interest]} ausgerichtet. ${depthLine[depth]} Du kannst Arbeiten ansehen, Case Studies oeffnen, den Prozess pruefen und im Kontaktbereich ein Projektbriefing starten.`
+    hi: `Saathvik Visuals mein swagat hai. Yeh ${room} version ${projectFocus[interest]} par focus karta hai. ${depthLine[depth]} Aap featured work dekh sakte hain, case studies khol sakte hain, process samajh sakte hain, aur contact section se quotation brief start kar sakte hain.`,
+    te: `Saathvik Visuals ki welcome. Ee ${room} version ${projectFocus[interest]} meeda focus chestundi. ${depthLine[depth]} Meeru featured work choodachu, case studies open cheyyachu, process ardham chesukovachu, contact section lo quotation brief start cheyyachu.`,
+    ta: `Saathvik Visuals ku welcome. Indha ${room} version ${projectFocus[interest]} mela focus pannum. ${depthLine[depth]} Neenga featured work paakalaam, case studies open pannalaam, process purinjukalaam, contact section la quotation brief start pannalaam.`,
+    fr: `Bienvenue dans ${room}. Cette version de Saathvik Visuals est organisee autour de ${projectFocus[interest]}. ${depthLine[depth]} Vous pouvez voir les projets, ouvrir les etudes de cas, comprendre le processus, puis demarrer un brief de quotation depuis la section contact.`,
+    es: `Bienvenido a ${room}. Esta version de Saathvik Visuals esta curada alrededor de ${projectFocus[interest]}. ${depthLine[depth]} Puedes explorar los trabajos, abrir casos de estudio, revisar el proceso y enviar un brief de quotation desde contacto.`,
+    de: `Willkommen in ${room}. Diese Version von Saathvik Visuals ist auf ${projectFocus[interest]} ausgerichtet. ${depthLine[depth]} Du kannst Arbeiten ansehen, Case Studies oeffnen, den Prozess pruefen und im Kontaktbereich ein quotation briefing starten.`
   };
   const utterance = new SpeechSynthesisUtterance(localized[language] ?? english);
   utterance.lang = languageCode[language];
@@ -820,7 +825,7 @@ function PaletteMenu() {
   return (
     <div className="palette-menu-root relative">
       <button
-        className="palette-trigger magnetic flex h-10 items-center gap-2 rounded-full border hairline px-3 text-xs font-black text-[var(--ink)] shadow-sm"
+        className="palette-trigger magnetic flex h-10 flex-nowrap items-center gap-2 rounded-full border hairline px-3 text-xs font-black text-[var(--ink)] shadow-sm"
         onClick={() => setOpen((value) => !value)}
         aria-label="Choose color palette"
         aria-expanded={open}
@@ -829,7 +834,7 @@ function PaletteMenu() {
           className="h-4 w-4 rounded-full shadow-sm"
           style={{ background: `linear-gradient(135deg, ${active.accent}, ${active.accent2})` }}
         />
-        <span className="hidden sm:inline">{active.label}</span>
+          <span className="hidden max-w-[9.5rem] whitespace-nowrap sm:inline">{active.label}</span>
         <Palette size={14} />
       </button>
       <AnimatePresence>
@@ -994,13 +999,56 @@ function Hero() {
             <a className="magnetic inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-6 text-sm font-bold text-white no-underline shadow-xl" href="#work" onClick={(event) => scrollToSection(event, "work")}>
               {t.explore} <ArrowUpRight size={17} />
             </a>
-            <a className="magnetic inline-flex min-h-12 items-center justify-center gap-2 rounded-full border hairline bg-[var(--card)] px-6 text-sm font-bold text-[var(--ink)] no-underline backdrop-blur-xl" href="#contact" onClick={(event) => scrollToSection(event, "contact")}>
+            <Link className="magnetic inline-flex min-h-12 items-center justify-center gap-2 rounded-full border hairline bg-[var(--card)] px-6 text-sm font-bold text-[var(--ink)] no-underline backdrop-blur-xl" href="/contact">
               {t.contact} <MousePointer2 size={17} />
-            </a>
+            </Link>
           </div>
         </motion.div>
       </div>
       <ScrollCue />
+    </section>
+  );
+}
+
+function ServicesBand() {
+  const language = useExperienceStore((state) => state.language);
+  const t = translations[language];
+
+  return (
+    <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-12">
+      <div className="rounded-[2.4rem] border hairline bg-[color-mix(in_srgb,var(--card)_86%,transparent)] p-6 shadow-[0_30px_90px_var(--shadow-color)] backdrop-blur-2xl sm:p-8">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.28em] text-[var(--accent)]">Services</p>
+            <h2 className="mode-font mt-3 text-3xl font-black sm:text-5xl">Services built for real businesses.</h2>
+          </div>
+          <p className="max-w-xl text-sm leading-6 text-[var(--muted)] sm:text-base">
+            {language === "en"
+              ? "A cleaner service strip with clear starting points, a quote path, and enough context to understand what each offer is for."
+              : t.subhead}
+          </p>
+        </div>
+        <div className="mt-7 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {services.map((service) => (
+            <Link
+              key={service.key}
+              href={`/services/${service.key}`}
+              className="group rounded-[1.6rem] border hairline bg-[var(--card)] p-5 no-underline transition hover:-translate-y-1 hover:border-[var(--accent)]"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <strong className="text-lg text-[var(--ink)]">{service.title}</strong>
+                <ArrowUpRight size={18} className="text-[var(--accent)] transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </div>
+              <p className="mt-3 text-sm leading-6 text-[var(--muted)]">{service.short}</p>
+              <div className="mt-4 flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-[var(--accent)]">
+                <span>{service.pricing.from}</span>
+                <span className="text-[var(--muted)]">•</span>
+                <span>{service.pricing.advance}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }
@@ -1390,77 +1438,132 @@ function ClientExperience() {
   const t = translations[language];
   const pageCopy = getPageCopy(language);
   const reviews = getTestimonials();
+  const [activeReviewIndex, setActiveReviewIndex] = useState(0);
+  const activeReview = reviews[activeReviewIndex] ?? reviews[0];
 
   return (
-    <section className="relative mx-auto max-w-7xl overflow-hidden rounded-[2.6rem] px-5 py-20 sm:px-8">
-      <AmbientVideoBackdrop slugs={["aarna-salon", "naad", "jaabili"]} />
-      <div className="relative z-10">
-        <p className="text-sm font-black uppercase text-[var(--accent)]">{t.satisfaction}</p>
-        <motion.h2
-          className="mode-font mt-3 max-w-4xl text-4xl font-black leading-tight sm:text-6xl"
-          initial={{ opacity: 0, y: 28, filter: "blur(8px)" }}
-          whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          viewport={{ once: true, margin: "-80px" }}
-        >
-          {pageCopy.clientTitle}
-        </motion.h2>
+    <section className="relative mx-auto max-w-7xl px-5 py-20 sm:px-8">
+      <div className="glass relative overflow-hidden rounded-[2.6rem] p-6 sm:p-8">
+        <AmbientVideoBackdrop slugs={["aarna-salon", "naad", "jaabili"]} />
+        <div className="relative z-10">
+          <p className="text-sm font-black uppercase tracking-[0.28em] text-[var(--accent)]">{t.satisfaction}</p>
+          <motion.h2
+            className="mode-font mt-3 max-w-4xl text-4xl font-black leading-tight sm:text-6xl"
+            initial={{ opacity: 0, y: 28, filter: "blur(8px)" }}
+            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            viewport={{ once: true, margin: "-80px" }}
+          >
+            {pageCopy.clientTitle}
+          </motion.h2>
 
-        {reviews.length === 0 ? (
-          <div className="glass mt-9 rounded-[2rem] p-10 text-center">
-            <p className="m-0 text-lg leading-7 text-[var(--muted)]">
-              New studio, growing fast — the first client reviews will be landing here soon.
-            </p>
-          </div>
-        ) : (
-          <div className="mt-9 grid gap-6 lg:grid-cols-3">
-            {reviews.map((item, index) => (
-              <motion.figure
-                key={`${item.name}-${index}`}
-                className="glass relative m-0 rotate-0 rounded-[1.6rem] p-7"
-                style={{ transform: `rotate(${index % 2 === 0 ? -1.2 : 1.4}deg)` }}
-                initial={{ opacity: 0, y: 24, rotate: 0 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-60px" }}
-                transition={{ delay: index * 0.08 }}
-              >
-                {item.rating && (
-                  <div className="mb-3 flex gap-0.5" aria-label={`${item.rating} out of 5 stars`}>
-                    {Array.from({ length: 5 }).map((_, star) => (
-                      <Star
-                        key={star}
-                        size={15}
-                        className={star < item.rating! ? "fill-[var(--accent)] text-[var(--accent)]" : "text-[var(--muted)]"}
-                      />
-                    ))}
+          {reviews.length === 0 ? (
+            <div className="mt-8 grid gap-4 rounded-[2rem] border hairline bg-[var(--card)] p-6 lg:grid-cols-[0.95fr_1.05fr]">
+              <div className="rounded-[1.5rem] border border-dashed border-[var(--line)] p-5">
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--accent)]">Incoming reviews</p>
+                <h3 className="mt-3 text-2xl font-black text-[var(--ink)]">Waiting for the first Google Form responses.</h3>
+                <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
+                  Once the form is filled, the review area will populate automatically with client name, project, deliverables, and rating.
+                </p>
+              </div>
+              <div className="rounded-[1.5rem] border border-dashed border-[var(--line)] p-5">
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--accent)]">What will appear</p>
+                <ul className="mt-4 grid gap-2 text-sm leading-6 text-[var(--muted)]">
+                  <li>Client name and public rating</li>
+                  <li>Project or service name</li>
+                  <li>Deliverables or scope completed</li>
+                  <li>Review text and optional project link</li>
+                </ul>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-8 grid gap-5 lg:grid-cols-[0.42fr_0.58fr]">
+              <div className="max-h-[32rem] space-y-3 overflow-y-auto pr-2 lg:pr-3">
+                {reviews.map((item, index) => {
+                  const selected = index === activeReviewIndex;
+                  return (
+                    <button
+                      key={item.name + "-" + index}
+                      type="button"
+                      onClick={() => setActiveReviewIndex(index)}
+                      className={cn(
+                        "snap-start rounded-[1.5rem] border p-4 text-left transition",
+                        selected ? "border-[var(--accent)] bg-[color-mix(in_srgb,var(--accent)_8%,transparent)]" : "border-[var(--line)] bg-[var(--card)] hover:border-[var(--accent)]"
+                      )}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <strong className="block text-base text-[var(--ink)]">{item.name}</strong>
+                          <span className="mt-1 block text-xs font-bold uppercase tracking-[0.16em] text-[var(--muted)]">{item.project ?? item.role ?? "Client review"}</span>
+                        </div>
+                        {item.rating ? (
+                          <div className="flex gap-0.5">
+                            {Array.from({ length: 5 }).map((_, star) => (
+                              <Star key={star} size={13} className={star < item.rating! ? "fill-[var(--accent)] text-[var(--accent)]" : "text-[var(--muted)]"} />
+                            ))}
+                          </div>
+                        ) : null}
+                      </div>
+                      <p className="mt-3 line-clamp-3 text-sm leading-6 text-[var(--muted)]">{item.quote}</p>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {activeReview ? (
+                <motion.figure
+                  key={activeReview.name + "-" + activeReviewIndex}
+                  className="glass relative m-0 overflow-hidden rounded-[2rem] p-6 sm:p-7"
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.28 }}
+                >
+                  <div className="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,var(--accent),transparent)]" />
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--accent)]">Selected review</p>
+                      <h3 className="mt-2 text-2xl font-black text-[var(--ink)]">{activeReview.name}</h3>
+                      <p className="mt-1 text-sm font-bold uppercase tracking-[0.16em] text-[var(--muted)]">{activeReview.project ?? activeReview.role ?? "Client review"}</p>
+                    </div>
+                    {activeReview.language ? (
+                      <span className="rounded-full border hairline px-2.5 py-1 text-[0.6rem] font-black uppercase tracking-wide text-[var(--muted)]">{activeReview.language}</span>
+                    ) : null}
                   </div>
-                )}
-                <blockquote className="handwritten-quote m-0 text-2xl leading-snug text-[var(--ink)]">"{item.quote}"</blockquote>
-                <figcaption className="mt-6 flex items-end justify-between gap-3 border-t hairline pt-4">
-                  <div>
-                    <strong className="block text-sm font-black uppercase tracking-wide text-[var(--accent)]">{item.name}</strong>
-                    {item.project && (
-                      item.projectUrl ? (
-                        <a className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-[var(--muted)] no-underline hover:text-[var(--accent)]" href={item.projectUrl} target="_blank" rel="noreferrer">
-                          {item.project} <ArrowUpRight size={11} />
-                        </a>
-                      ) : (
-                        <span className="mt-1 block text-xs font-bold text-[var(--muted)]">{item.project}</span>
-                      )
-                    )}
+
+                  {activeReview.rating ? (
+                    <div className="mt-5 flex gap-0.5" aria-label={"" + activeReview.rating + " out of 5 stars"}>
+                      {Array.from({ length: 5 }).map((_, star) => (
+                        <Star key={star} size={16} className={star < activeReview.rating! ? "fill-[var(--accent)] text-[var(--accent)]" : "text-[var(--muted)]"} />
+                      ))}
+                    </div>
+                  ) : null}
+
+                  <blockquote className="handwritten-quote mt-5 m-0 text-2xl leading-snug text-[var(--ink)]">"{activeReview.quote}"</blockquote>
+
+                  <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                    <div className="rounded-[1.4rem] border hairline bg-[var(--card)] p-4">
+                      <p className="m-0 text-xs font-black uppercase tracking-[0.2em] text-[var(--muted)]">Project</p>
+                      <p className="mt-2 text-sm font-bold text-[var(--ink)]">{activeReview.project ?? "Not shared"}</p>
+                    </div>
+                    <div className="rounded-[1.4rem] border hairline bg-[var(--card)] p-4">
+                      <p className="m-0 text-xs font-black uppercase tracking-[0.2em] text-[var(--muted)]">Deliverables</p>
+                      <p className="mt-2 text-sm font-bold text-[var(--ink)]">{activeReview.deliverables ?? "Not shared"}</p>
+                    </div>
                   </div>
-                  {item.language && item.language.toLowerCase() !== "english" && (
-                    <span className="rounded-full border hairline px-2.5 py-1 text-[0.6rem] font-black uppercase tracking-wide text-[var(--muted)]">{item.language}</span>
-                  )}
-                </figcaption>
-              </motion.figure>
-            ))}
-          </div>
-        )}
+
+                  {activeReview.projectUrl ? (
+                    <a className="mt-5 inline-flex items-center gap-2 text-sm font-black text-[var(--accent)] no-underline" href={activeReview.projectUrl} target="_blank" rel="noreferrer">
+                      Open project link <ArrowUpRight size={14} />
+                    </a>
+                  ) : null}
+                </motion.figure>
+              ) : null}
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );
 }
-
 function Process() {
   const language = useExperienceStore((state) => state.language);
   const t = translations[language];
@@ -1469,140 +1572,118 @@ function Process() {
   return (
     <section id="process" className="relative mx-auto max-w-7xl px-5 py-20 sm:px-8">
       <p className="text-sm font-black uppercase text-[var(--accent)]">{t.process}</p>
-      <div className="relative mt-12 grid gap-10">
-        <div className="absolute bottom-6 left-[27px] top-6 hidden w-px sm:block" style={{ background: "linear-gradient(to bottom, var(--accent), transparent)" }} />
-        {pageCopy.processItems.map(([title, text], index) => (
-          <motion.div
-            key={title}
-            className={cn("relative grid items-start gap-5 sm:grid-cols-[56px_1fr]", index % 2 === 1 && "sm:pl-12")}
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-60px" }}
-            transition={{ delay: (index % 4) * 0.05 }}
-          >
+      <div className="relative mt-10 overflow-hidden rounded-[2.6rem] border hairline bg-[color-mix(in_srgb,var(--card)_78%,transparent)] p-5 shadow-[0_30px_110px_var(--shadow-color)] sm:p-7">
+        <div className="pointer-events-none absolute inset-0 opacity-70">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--ink) 9%, transparent) 1px, transparent 0)",
+              backgroundSize: "24px 24px"
+            }}
+          />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,var(--accent)_0%,transparent_45%)] opacity-20" />
+        </div>
+        <div className="relative z-10">
+          <div className="relative overflow-hidden rounded-[2.2rem] border border-[var(--line)] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.86),rgba(245,239,229,0.97))] p-4 sm:p-6">
             <div
-              className="relative z-10 grid h-14 w-14 shrink-0 place-items-center rounded-full border-2 text-sm font-black"
-              style={{ borderColor: "var(--accent)", background: "var(--paper)", color: "var(--accent)" }}
-            >
-              0{index + 1}
+              aria-hidden
+              className="pointer-events-none absolute inset-0 opacity-60"
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle at 50% 50%, transparent 0 18%, color-mix(in srgb, var(--accent) 8%, transparent) 18% 19%, transparent 19% 36%, color-mix(in srgb, var(--ink) 8%, transparent) 36% 37%, transparent 37% 100%)"
+              }}
+            />
+            <div className="relative mx-auto grid max-w-6xl gap-4 md:grid-cols-3 md:grid-rows-3 md:gap-6">
+              <div className="hidden md:block md:col-start-2 md:row-start-2">
+                <div className="relative mx-auto flex h-full min-h-[16rem] items-center justify-center rounded-[2rem] border border-[var(--accent)]/18 bg-[color-mix(in_srgb,var(--accent)_8%,transparent)] shadow-[0_0_120px_var(--glow)]">
+                  <div className="flex h-32 w-32 items-center justify-center rounded-full border border-[var(--accent)]/22 bg-[var(--card)] text-center shadow-[0_18px_70px_var(--shadow-color)]">
+                    <div>
+                      <p className="m-0 text-[0.6rem] font-black uppercase tracking-[0.32em] text-[var(--accent)]">Core</p>
+                      <p className="m-0 mt-2 text-sm font-black text-[var(--ink)]">Strategy</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {pageCopy.processItems.map(([title, text], index) => {
+                const gridClass =
+                  index === 0
+                    ? "md:col-start-2 md:row-start-1"
+                    : index === 1
+                      ? "md:col-start-3 md:row-start-1"
+                      : index === 2
+                        ? "md:col-start-3 md:row-start-2"
+                        : index === 3
+                          ? "md:col-start-2 md:row-start-3"
+                          : index === 4
+                            ? "md:col-start-1 md:row-start-3"
+                            : "md:col-start-1 md:row-start-2";
+                return (
+                  <motion.article
+                    key={title}
+                    className={cn(
+                      "process-orbit relative z-20 rounded-[1.7rem] border hairline bg-[var(--card)] p-4 shadow-[0_20px_70px_var(--shadow-color)]",
+                      gridClass
+                    )}
+                    initial={{ opacity: 0, y: 18, scale: 0.97 }}
+                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                    viewport={{ once: true, margin: "-80px" }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="grid h-10 w-10 place-items-center rounded-full border border-[var(--line)] bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] text-sm font-black text-[var(--accent)]">
+                        0{index + 1}
+                      </span>
+                      <span className="text-xs font-black uppercase tracking-[0.26em] text-[var(--muted)]">Orbit</span>
+                    </div>
+                    <h3 className="mode-font mt-4 text-2xl font-black leading-none text-[var(--ink)]">{title}</h3>
+                    <p className="mt-3 text-sm leading-6 text-[var(--muted)]">{text}</p>
+                    <div className="mt-4 flex items-center gap-2">
+                      <span className="h-2.5 w-2.5 rounded-full bg-[var(--accent)]" />
+                      <span className="h-px flex-1 bg-[var(--line)]" />
+                    </div>
+                  </motion.article>
+                );
+              })}
             </div>
-            <div className={cn(index % 2 === 1 && "sm:max-w-2xl")}>
-              <h3 className="mode-font m-0 text-3xl font-black sm:text-4xl">{title}</h3>
-              <p className="m-0 mt-2 max-w-xl text-[var(--muted)]">{text}</p>
-            </div>
-          </motion.div>
-        ))}
+          </div>
+        </div>
       </div>
     </section>
   );
 }
 
-function Contact() {
+function EstimatePreview() {
   const language = useExperienceStore((state) => state.language);
   const t = translations[language];
-  const pageCopy = getPageCopy(language);
-  const [form, setForm] = useState({ name: "", email: "", message: "" });
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
-  const [notice, setNotice] = useState("");
-
-  async function submitContact(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setStatus("sending");
-    setNotice("");
-
-    try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form)
-      });
-      const payload = (await response.json()) as { message?: string };
-
-      if (!response.ok) {
-        throw new Error(payload.message ?? "Could not send the message right now.");
-      }
-
-      setStatus("sent");
-      setNotice(payload.message ?? "Brief received. I will get back to you soon.");
-      setForm({ name: "", email: "", message: "" });
-    } catch (error) {
-      setStatus("error");
-      setNotice(error instanceof Error ? error.message : "Could not send the message right now.");
-    }
-  }
-
   return (
     <section id="contact" className="mx-auto max-w-7xl px-5 py-24 sm:px-8">
       <div className="glass relative overflow-hidden rounded-[2.4rem] p-7 sm:p-12">
         <AmbientVideoBackdrop slugs={["spotify-drive", "netflix-altitude", "linkedin-creator"]} />
         <div className="relative z-10">
-        <p className="text-sm font-black uppercase text-[var(--accent)]">{pageCopy.contactLabel}</p>
-        <motion.h2
-          className="mode-font mt-3 max-w-4xl text-5xl font-black leading-tight sm:text-7xl"
-          initial={{ opacity: 0, y: 28, filter: "blur(8px)" }}
-          whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          viewport={{ once: true, margin: "-80px" }}
-        >
-          {t.contactTitle}
-        </motion.h2>
-        <div className="mt-8 grid gap-4 lg:grid-cols-[1fr_0.85fr]">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <a className="magnetic rounded-3xl border hairline bg-[var(--card)] p-5 text-[var(--ink)] no-underline" href={socialLinks.email}>
-              <Mail className="mb-5 text-[var(--accent)]" />
-              <strong className="block">{pageCopy.email}</strong>
-              <span className="mt-1 block text-sm text-[var(--muted)]">saathvikk202@gmail.com</span>
-            </a>
-            <a className="magnetic rounded-3xl border hairline bg-[var(--card)] p-5 text-[var(--ink)] no-underline" href={socialLinks.linkedin} target="_blank">
-              <SocialIcon type="linkedin" />
-              <strong className="mt-5 block">LinkedIn</strong>
-              <span className="mt-1 block text-sm text-[var(--muted)]">saathvik-kalepu</span>
-            </a>
-            <a className="magnetic rounded-3xl border hairline bg-[var(--card)] p-5 text-[var(--ink)] no-underline" href={socialLinks.instagram} target="_blank">
-              <SocialIcon type="instagram" />
-              <strong className="mt-5 block">Instagram</strong>
-              <span className="mt-1 block text-sm text-[var(--muted)]">@sunny__fr18</span>
-            </a>
-            <a className="magnetic rounded-3xl border hairline bg-[var(--card)] p-5 text-[var(--ink)] no-underline" href={socialLinks.github} target="_blank">
-              <GitBranch className="mb-5 text-[var(--accent)]" />
-              <strong className="block">GitHub</strong>
-              <span className="mt-1 block text-sm text-[var(--muted)]">github.com/saathvikvisuals</span>
+          <p className="text-sm font-black uppercase text-[var(--accent)]">Estimate and contact</p>
+          <motion.h2
+            className="mode-font mt-3 max-w-4xl text-5xl font-black leading-tight sm:text-7xl"
+            initial={{ opacity: 0, y: 28, filter: "blur(8px)" }}
+            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            viewport={{ once: true, margin: "-80px" }}
+          >
+            Replace the generic contact form with a clearer proposal path.
+          </motion.h2>
+          <p className="mt-5 max-w-3xl text-base leading-7 text-[var(--muted)] sm:text-lg">
+            Clients can now understand indicative cost, advance payment, and scope before you follow up with the final quote.
+          </p>
+          <div className="mt-8">
+            <ContactEstimator compact />
+          </div>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link className="magnetic inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-6 text-sm font-black text-white no-underline" href="/contact">
+              Open quotation page <ArrowUpRight size={17} />
+            </Link>
+            <a className="magnetic inline-flex min-h-12 items-center justify-center gap-2 rounded-full border hairline bg-[var(--card)] px-6 text-sm font-black text-[var(--ink)] no-underline" href={socialLinks.email}>
+              Email directly <Mail size={17} />
             </a>
           </div>
-          <form className="grid gap-3" onSubmit={submitContact}>
-            <input
-              className="min-h-12 rounded-2xl border hairline bg-[var(--card)] px-4 outline-none focus:border-[var(--accent)]"
-              placeholder={pageCopy.namePlaceholder}
-              value={form.name}
-              onChange={(event) => setForm((value) => ({ ...value, name: event.target.value }))}
-              required
-            />
-            <input
-              className="min-h-12 rounded-2xl border hairline bg-[var(--card)] px-4 outline-none focus:border-[var(--accent)]"
-              placeholder={pageCopy.emailPlaceholder}
-              type="email"
-              value={form.email}
-              onChange={(event) => setForm((value) => ({ ...value, email: event.target.value }))}
-              required
-            />
-            <textarea
-              className="min-h-32 rounded-2xl border hairline bg-[var(--card)] p-4 outline-none focus:border-[var(--accent)]"
-              placeholder={pageCopy.visionPlaceholder}
-              value={form.message}
-              onChange={(event) => setForm((value) => ({ ...value, message: event.target.value }))}
-              minLength={10}
-              required
-            />
-            <p className="m-0 px-1 text-xs font-bold leading-5 text-[var(--muted)]">Minimum 10 characters.</p>
-            <button className="magnetic inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-6 text-sm font-black text-white disabled:cursor-wait disabled:opacity-60" type="submit" disabled={status === "sending"}>
-              {t.brief} <BriefcaseBusiness size={17} />
-            </button>
-            {notice && (
-              <p className={cn("m-0 rounded-2xl border px-4 py-3 text-sm font-bold", status === "sent" ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-300" : "border-amber-400/40 bg-amber-400/10 text-amber-300")}>
-                {notice}
-              </p>
-            )}
-          </form>
-        </div>
         </div>
       </div>
     </section>
@@ -1622,10 +1703,12 @@ function Footer() {
           <p className="signature-note mt-7 max-w-xl text-5xl leading-none text-white">{pageCopy.footerSignature}</p>
           <p className="mt-6 max-w-lg text-sm leading-6 text-white/58">{pageCopy.footerText}</p>
         </div>
-        <div className="relative z-10 grid content-end gap-3 sm:grid-cols-2 lg:w-[420px]">
+        <div className="relative z-10 grid content-end gap-3 lg:w-[420px]">
+          <Link className="magnetic rounded-2xl border border-white/10 bg-white/7 p-5 text-white no-underline hover:bg-white/12" href="/contact">
+            <strong className="block text-lg">Request a quotation</strong>
+            <span className="mt-1 block text-sm text-white/54">Dedicated contact page with budget estimator and quotation flow.</span>
+          </Link>
           <SocialLink href={socialLinks.linkedin} label="LinkedIn" detail={pageCopy.socialProfessional} type="linkedin" />
-          <SocialLink href={socialLinks.instagram} label="Instagram" detail="@sunny__fr18" type="instagram" />
-          <SocialLink href={socialLinks.github} label="GitHub" detail={pageCopy.socialSource} type="github" />
           <SocialLink href={socialLinks.email} label={pageCopy.email} detail={pageCopy.socialBrief} type="mail" />
         </div>
       </div>

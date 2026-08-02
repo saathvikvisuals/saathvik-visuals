@@ -66,6 +66,8 @@ async function main() {
   const quoteCol = col("write in any language you're comfortable", "your experience", "review", "quote");
   const projectUrlCol = col("project link", "project url", "website link");
   const projectCol = col("project", "website");
+  const deliverablesCol = col("deliverables", "what did we deliver", "scope delivered", "service delivered");
+  const roleCol = col("role", "your role", "service type", "project type");
   const languageCol = col("what language did you write", "language");
   const consentCol = col("share this publicly", "show this publicly", "consent");
 
@@ -80,6 +82,8 @@ async function main() {
         quote: (row[quoteCol] || "").trim(),
         project: projectCol !== -1 ? (row[projectCol] || "").trim() || undefined : undefined,
         projectUrl: projectUrlCol !== -1 ? (row[projectUrlCol] || "").trim() || undefined : undefined,
+        deliverables: deliverablesCol !== -1 ? (row[deliverablesCol] || "").trim() || undefined : undefined,
+        role: roleCol !== -1 ? (row[roleCol] || "").trim() || undefined : undefined,
         language: languageCol !== -1 ? (row[languageCol] || "").trim() || undefined : undefined,
         rating: Number.isFinite(ratingRaw) && ratingRaw >= 1 && ratingRaw <= 5 ? ratingRaw : undefined,
       };

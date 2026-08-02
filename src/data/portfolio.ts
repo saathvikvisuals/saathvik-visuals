@@ -609,6 +609,8 @@ export type Testimonial = {
   quote: string;
   project?: string;
   projectUrl?: string;
+  deliverables?: string;
+  role?: string;
   language?: string;
   rating?: number;
 };
@@ -621,6 +623,7 @@ export const testimonials = testimonialsData as Testimonial[];
 
 export const socialLinks = {
   email: "mailto:saathvikk202@gmail.com",
+  whatsapp: "https://wa.me/919908179816",
   github: "https://github.com/saathvikvisuals",
   linkedin: "https://www.linkedin.com/in/saathvik-kalepu-17041228b/",
   instagram: "https://www.instagram.com/sunny__fr18/"

@@ -35,9 +35,28 @@ export function EntranceExperience() {
     const updateMobile = () => setIsMobile(media.matches);
     updateMobile();
     media.addEventListener("change", updateMobile);
-    // Every load of this page (including a plain refresh) re-opens the
-    // curation quiz from the first screen — visitors asked to be able to
-    // redo it any time, not just on a brand-new tab.
+    const seen = sessionStorage.getItem("sv-entrance-seen") === "true";
+    const saved = sessionStorage.getItem("sv-curation");
+
+    if (seen) {
+      try {
+        const result = saved ? (JSON.parse(saved) as CurationResult) : null;
+        if (result) {
+          setMode(result.mode);
+          setInterest(result.interest);
+          setDepth(result.depth);
+          setCurationSignature(result.signature);
+        }
+      } catch {
+        // Ignore malformed stored curation and fall back to the default room.
+      }
+      setCurated(true);
+      setOpen(false);
+      return () => {
+        media.removeEventListener("change", updateMobile);
+      };
+    }
+
     setCurated(false);
     setOpen(true);
 

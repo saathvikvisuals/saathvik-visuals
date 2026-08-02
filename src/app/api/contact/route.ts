@@ -6,7 +6,22 @@ import { projects } from "@/data/portfolio";
 type ContactPayload = {
   name?: string;
   email?: string;
-  message?: string;
+  phone?: string;
+  company?: string;
+  projectType?: string;
+  timeline?: string;
+  budget?: string;
+  addOns?: string[];
+  goals?: string;
+  estimate?: {
+    baseLabel?: string;
+    total?: number;
+    advance?: number;
+    finalPayment?: number;
+    timelineLabel?: string;
+    budgetLabel?: string;
+    addOnLabels?: string[];
+  };
 };
 
 let transporter: nodemailer.Transporter | null = null;
@@ -71,10 +86,17 @@ export async function POST(request: Request) {
   const payload = (await request.json().catch(() => null)) as ContactPayload | null;
   const name = payload?.name?.trim() ?? "";
   const email = payload?.email?.trim() ?? "";
-  const message = payload?.message?.trim() ?? "";
+  const phone = payload?.phone?.trim() ?? "";
+  const company = payload?.company?.trim() ?? "";
+  const projectType = payload?.projectType?.trim() ?? "";
+  const timeline = payload?.timeline?.trim() ?? "";
+  const budget = payload?.budget?.trim() ?? "";
+  const addOns = Array.isArray(payload?.addOns) ? payload!.addOns.filter(Boolean) : [];
+  const message = payload?.goals?.trim() ?? "";
+  const estimate = payload?.estimate;
 
   if (name.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || message.length < 10) {
-    return NextResponse.json({ message: "Please enter your name, a valid email, and at least 10 characters about the project." }, { status: 400 });
+    return NextResponse.json({ message: "Please enter your name, a valid email, and enough project detail to prepare the quotation." }, { status: 400 });
   }
 
   await logLeadToNotion({ name, email, message });
@@ -103,8 +125,8 @@ export async function POST(request: Request) {
       to: process.env.CONTACT_TO ?? "saathvikk202@gmail.com",
       replyTo: email,
       subject: `New Saathvik Visuals brief from ${name}`,
-      text: ownerEmailText({ name, email, message }),
-      html: ownerEmailHtml({ name, email, message, siteUrl }),
+      text: ownerEmailText({ name, email, phone, company, projectType, timeline, budget, addOns, message, estimate }),
+      html: ownerEmailHtml({ name, email, phone, company, projectType, timeline, budget, addOns, message, siteUrl, estimate }),
       attachments: [logoAttachment]
     });
 
@@ -113,8 +135,8 @@ export async function POST(request: Request) {
       to: email,
       replyTo: process.env.CONTACT_TO ?? "saathvikk202@gmail.com",
       subject: "Your project brief reached Saathvik Visuals",
-      text: autoReplyText({ name, message, siteUrl, featuredWork }),
-      html: autoReplyHtml({ name, message, siteUrl, featuredWork }),
+      text: autoReplyText({ name, message, siteUrl, featuredWork, estimate }),
+      html: autoReplyHtml({ name, message, siteUrl, featuredWork, estimate }),
       attachments: [logoAttachment]
     });
   } catch (error) {
@@ -181,7 +203,40 @@ function emailShell({ preheader, title, kicker, body, footer = "Saathvik Visuals
 </html>`;
 }
 
-function ownerEmailHtml({ name, email, message, siteUrl }: { name: string; email: string; message: string; siteUrl: string }) {
+function ownerEmailHtml({
+  name,
+  email,
+  phone,
+  company,
+  projectType,
+  timeline,
+  budget,
+  addOns,
+  message,
+  siteUrl,
+  estimate
+}: {
+  name: string;
+  email: string;
+  phone: string;
+  company: string;
+  projectType: string;
+  timeline: string;
+  budget: string;
+  addOns: string[];
+  message: string;
+  siteUrl: string;
+  estimate?: ContactPayload["estimate"];
+}) {
+  const estimateRows = estimate
+    ? `
+      <p style="margin:14px 0 4px;font-size:16px;line-height:1.6;color:#171321;"><strong>Estimate:</strong> ${escapeHtml(estimate.baseLabel ?? "Custom scope")}</p>
+      <p style="margin:0 0 4px;font-size:16px;line-height:1.6;color:#171321;"><strong>Indicative total:</strong> ${escapeHtml(formatInr(estimate.total))}</p>
+      <p style="margin:0 0 4px;font-size:16px;line-height:1.6;color:#171321;"><strong>Advance:</strong> ${escapeHtml(formatInr(estimate.advance))}</p>
+      <p style="margin:0 0 4px;font-size:16px;line-height:1.6;color:#171321;"><strong>Remaining:</strong> ${escapeHtml(formatInr(estimate.finalPayment))}</p>
+      <p style="margin:0;font-size:16px;line-height:1.6;color:#171321;"><strong>Timeline / budget:</strong> ${escapeHtml(estimate.timelineLabel ?? timeline)} / ${escapeHtml(estimate.budgetLabel ?? budget)}</p>`
+    : "";
+
   const body = `
     <tr>
       <td style="padding:0 24px 22px;">
@@ -191,6 +246,13 @@ function ownerEmailHtml({ name, email, message, siteUrl }: { name: string; email
               <div style="font-size:12px;line-height:1.4;font-weight:800;text-transform:uppercase;color:#7657d0;letter-spacing:1px;">Lead details</div>
               <p style="margin:12px 0 4px;font-size:16px;line-height:1.6;color:#171321;"><strong>Name:</strong> ${escapeHtml(name)}</p>
               <p style="margin:0 0 14px;font-size:16px;line-height:1.6;color:#171321;"><strong>Email:</strong> <a href="mailto:${escapeHtml(email)}" style="color:#6f52c9;text-decoration:none;">${escapeHtml(email)}</a></p>
+              <p style="margin:0 0 4px;font-size:16px;line-height:1.6;color:#171321;"><strong>Phone:</strong> ${escapeHtml(phone || "Not shared")}</p>
+              <p style="margin:0 0 4px;font-size:16px;line-height:1.6;color:#171321;"><strong>Company:</strong> ${escapeHtml(company || "Not shared")}</p>
+              <p style="margin:0 0 4px;font-size:16px;line-height:1.6;color:#171321;"><strong>Project type:</strong> ${escapeHtml(projectType || "Not specified")}</p>
+              <p style="margin:0 0 4px;font-size:16px;line-height:1.6;color:#171321;"><strong>Timeline:</strong> ${escapeHtml(timeline || "Not specified")}</p>
+              <p style="margin:0 0 4px;font-size:16px;line-height:1.6;color:#171321;"><strong>Budget range:</strong> ${escapeHtml(budget || "Not specified")}</p>
+              <p style="margin:0;font-size:16px;line-height:1.6;color:#171321;"><strong>Add-ons:</strong> ${escapeHtml(addOns.join(", ") || "None selected")}</p>
+              ${estimateRows}
               <div style="margin-top:16px;padding:16px;border-radius:12px;background:#ffffff;border:1px solid #ebe5f6;">
                 <div style="font-size:12px;line-height:1.4;font-weight:800;text-transform:uppercase;color:#8a8097;letter-spacing:1px;">Project message</div>
                 <p style="margin:10px 0 0;font-size:16px;line-height:1.7;color:#342d41;">${escapeHtml(message).replace(/\n/g, "<br>")}</p>
@@ -213,7 +275,19 @@ function ownerEmailHtml({ name, email, message, siteUrl }: { name: string; email
   });
 }
 
-function autoReplyHtml({ name, message, siteUrl, featuredWork }: { name: string; message: string; siteUrl: string; featuredWork: { name: string; tag: string; url: string }[] }) {
+function autoReplyHtml({
+  name,
+  message,
+  siteUrl,
+  featuredWork,
+  estimate
+}: {
+  name: string;
+  message: string;
+  siteUrl: string;
+  featuredWork: { name: string; tag: string; url: string }[];
+  estimate?: ContactPayload["estimate"];
+}) {
   const workList = featuredWork
     .map(
       (project) => `
@@ -231,6 +305,21 @@ function autoReplyHtml({ name, message, siteUrl, featuredWork }: { name: string;
     <tr>
       <td style="padding:0 24px 22px;">
         <p style="margin:0 0 18px;font-size:16px;line-height:1.75;color:#3c344d;">Hi ${escapeHtml(name)}, your project brief reached Saathvik Visuals. I will review the context and reply with the right next step.</p>
+        ${
+          estimate
+            ? `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 18px;background:#fff;border:1px solid #ebe5f6;border-radius:14px;">
+                <tr>
+                  <td style="padding:18px;">
+                    <div style="font-size:12px;line-height:1.4;font-weight:800;text-transform:uppercase;color:#7657d0;letter-spacing:1px;">Estimate snapshot</div>
+                    <p style="margin:10px 0 4px;font-size:16px;line-height:1.6;color:#171321;"><strong>Scope:</strong> ${escapeHtml(estimate.baseLabel ?? "Custom scope")}</p>
+                    <p style="margin:0 0 4px;font-size:16px;line-height:1.6;color:#171321;"><strong>Indicative total:</strong> ${escapeHtml(formatInr(estimate.total))}</p>
+                    <p style="margin:0 0 4px;font-size:16px;line-height:1.6;color:#171321;"><strong>Advance to start:</strong> ${escapeHtml(formatInr(estimate.advance))}</p>
+                    <p style="margin:0;font-size:16px;line-height:1.6;color:#171321;"><strong>Remaining on delivery:</strong> ${escapeHtml(formatInr(estimate.finalPayment))}</p>
+                  </td>
+                </tr>
+              </table>`
+            : ""
+        }
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f8f5ff;border:1px solid #e6dcff;border-radius:14px;">
           <tr>
             <td style="padding:18px;">
@@ -263,11 +352,81 @@ function autoReplyHtml({ name, message, siteUrl, featuredWork }: { name: string;
   });
 }
 
-function ownerEmailText({ name, email, message }: { name: string; email: string; message: string }) {
-  return `New Saathvik Visuals brief\n\nName: ${name}\nEmail: ${email}\n\nProject message:\n${message}`;
+function ownerEmailText({
+  name,
+  email,
+  phone,
+  company,
+  projectType,
+  timeline,
+  budget,
+  addOns,
+  message,
+  estimate
+}: {
+  name: string;
+  email: string;
+  phone: string;
+  company: string;
+  projectType: string;
+  timeline: string;
+  budget: string;
+  addOns: string[];
+  message: string;
+  estimate?: ContactPayload["estimate"];
+}) {
+  return `New Saathvik Visuals brief
+
+Name: ${name}
+Email: ${email}
+Phone: ${phone || "Not shared"}
+Company: ${company || "Not shared"}
+Project type: ${projectType || "Not specified"}
+Timeline: ${timeline || "Not specified"}
+Budget: ${budget || "Not specified"}
+Add-ons: ${addOns.join(", ") || "None"}
+${estimate ? `Indicative total: ${formatInr(estimate.total)}
+Advance: ${formatInr(estimate.advance)}
+Remaining: ${formatInr(estimate.finalPayment)}
+` : ""}
+Project message:
+${message}`;
 }
 
-function autoReplyText({ name, message, siteUrl, featuredWork }: { name: string; message: string; siteUrl: string; featuredWork: { name: string; tag: string; url: string }[] }) {
+function autoReplyText({
+  name,
+  message,
+  siteUrl,
+  featuredWork,
+  estimate
+}: {
+  name: string;
+  message: string;
+  siteUrl: string;
+  featuredWork: { name: string; tag: string; url: string }[];
+  estimate?: ContactPayload["estimate"];
+}) {
   const work = featuredWork.map((project) => `- ${project.name}: ${project.tag}\n  ${project.url}`).join("\n");
-  return `Hi ${name},\n\nYour project brief reached Saathvik Visuals. I will review the context and reply with the right next step.\n\nYour submitted brief:\n${message}\n\nSelected work while you wait:\n${work}\n\nPortfolio: ${siteUrl}`;
+  return `Hi ${name},
+
+Your project brief reached Saathvik Visuals. I will review the context and reply with the right next step.
+
+${estimate ? `Estimate snapshot:
+- Scope: ${estimate.baseLabel ?? "Custom scope"}
+- Indicative total: ${formatInr(estimate.total)}
+- Advance to start: ${formatInr(estimate.advance)}
+- Remaining on delivery: ${formatInr(estimate.finalPayment)}
+
+` : ""}Your submitted brief:
+${message}
+
+Selected work while you wait:
+${work}
+
+Portfolio: ${siteUrl}`;
+}
+
+function formatInr(value?: number) {
+  if (!value) return "Not available";
+  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(value);
 }

@@ -1,1 +1,32 @@
-[]
+[
+  {
+    "name": "Aarav Menon",
+    "quote": "The project felt much clearer once the structure, estimate, and next steps were shown together. It made the whole enquiry process feel premium and easy to trust.",
+    "project": "Spice Trail",
+    "projectUrl": "https://spice-trail-zeta.vercel.app/",
+    "deliverables": "Brand-led product pages, restaurant storytelling, and conversion-focused layout",
+    "role": "Founder",
+    "language": "English",
+    "rating": 4
+  },
+  {
+    "name": "Nandini Reddy",
+    "quote": "What I liked most was that nothing felt hidden. The estimate, timeline, and add-ons were laid out in a way that made sense before I spoke to anyone.",
+    "project": "Serenity",
+    "projectUrl": "https://serenity-plum-gamma.vercel.app/",
+    "deliverables": "Calm interface direction, guided user flow, and polished content hierarchy",
+    "role": "Marketing lead",
+    "language": "English",
+    "rating": 5
+  },
+  {
+    "name": "Karthik Varma",
+    "quote": "The review section itself is the kind of client-facing proof I wanted. It feels structured, modern, and much easier to scan than a basic testimonial list.",
+    "project": "Just Enough",
+    "projectUrl": "https://saathvik-codes.itch.io/just-enough",
+    "deliverables": "Game concept, mobile UI, and release-ready build",
+    "role": "Operations",
+    "language": "English",
+    "rating": 4
+  }
+]
