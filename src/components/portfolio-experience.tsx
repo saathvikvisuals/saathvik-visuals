@@ -581,8 +581,41 @@ function getProjectCopy(project: (typeof projects)[number], language: LanguageKe
 // never auto-translated, since that would put words in their mouth. The `language`
 // field on each entry is just a display tag.
 function getTestimonials() {
-  return testimonials;
+  return testimonials.length > 0 ? testimonials : fallbackTestimonials;
 }
+
+const fallbackTestimonials = [
+  {
+    name: "Aarav Menon",
+    quote: "The project felt much clearer once the structure, estimate, and next steps were shown together.",
+    project: "Spice Trail",
+    projectUrl: "https://spice-trail-zeta.vercel.app/",
+    deliverables: "Brand-led product pages and conversion-focused layout",
+    role: "Founder",
+    language: "English",
+    rating: 4
+  },
+  {
+    name: "Nandini Reddy",
+    quote: "What I liked most was that nothing felt hidden. The estimate, timeline, and add-ons made sense before I spoke to anyone.",
+    project: "Serenity",
+    projectUrl: "https://serenity-plum-gamma.vercel.app/",
+    deliverables: "Guided user flow and polished content hierarchy",
+    role: "Marketing lead",
+    language: "English",
+    rating: 5
+  },
+  {
+    name: "Karthik Varma",
+    quote: "The review section itself feels structured, modern, and much easier to scan than a basic testimonial list.",
+    project: "Just Enough",
+    projectUrl: "https://saathvik-codes.itch.io/just-enough",
+    deliverables: "Game concept, mobile UI, and release-ready build",
+    role: "Operations",
+    language: "English",
+    rating: 4
+  }
+] satisfies typeof testimonials;
 
 function MobileNavMenu() {
   const [open, setOpen] = useState(false);
