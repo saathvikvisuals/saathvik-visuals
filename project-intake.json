@@ -9,8 +9,18 @@
     "image": "/project-screenshots/just-enough.png",
     "embedUrl": "https://itch.io/embed/4766717",
     "description": "A puzzle game where the only move is removing things. 10 mechanics, daily shared puzzles, and difficulty that adapts to the player.",
-    "tags": ["mobile", "game", "puzzle", "expo", "react-native"],
-    "palette": ["#84A98C", "#FAF8F4", "#F6B89E"],
+    "tags": [
+      "mobile",
+      "game",
+      "puzzle",
+      "expo",
+      "react-native"
+    ],
+    "palette": [
+      "#84A98C",
+      "#FAF8F4",
+      "#F6B89E"
+    ],
     "problem": "Most casual puzzle games repeat one mechanic with escalating difficulty and offer no sense of daily shared ritual.",
     "solution": "Designed and built a solo mobile puzzle game around a single constraint (removal only), spanning 10 distinct mechanics, a daily shared puzzle, and adaptive difficulty.",
     "outcome": "Shipped an Expo/React Native app end to end solo: game design, level generation logic, Firebase auth/data, crash reporting, and store distribution.",
@@ -18,13 +28,58 @@
       "layout": "journey",
       "hook": "Every level starts overloaded. The only move is letting go.",
       "stages": [
-        { "label": "01", "title": "Too Much, Not Too Hard", "copy": "Most casual puzzle games repeat one mechanic with escalating difficulty and offer no sense of daily shared ritual.", "useVideo": true, "videoFile": "just-enough-01" },
-        { "label": "02", "title": "One Rule: Remove", "copy": "Every level starts overloaded — a cluttered desk, a list of numbers with a hidden rule, a grid that looks solved until you check twice. Removal is the only tool.", "useVideo": true, "videoFile": "just-enough-02" },
-        { "label": "03", "title": "Ten Mechanics, One Constraint", "copy": "Grid logic, number chains, memory match, and NYT-Connections-style categorizing all share the same core move, so the game stays varied without losing its identity.", "useVideo": true, "videoFile": "just-enough-03" },
-        { "label": "04", "title": "Built to Adapt", "copy": "Designed and built solo around a single constraint, spanning 10 distinct mechanics, a daily shared puzzle, and difficulty that adjusts to who's playing.", "useVideo": true, "videoFile": "just-enough-04" },
-        { "label": "05", "title": "Worlds That Unlock", "copy": "Levels are grouped into worlds that open up as you clear the ones before them, each with its own painted backdrop and tone.", "useVideo": true, "videoFile": "just-enough-05" },
-        { "label": "06", "title": "Shipped End to End", "copy": "Shipped an Expo/React Native app solo: game design, level generation logic, Firebase auth/data, crash reporting, and store distribution.", "useVideo": true, "videoFile": "just-enough-06" }
+        {
+          "label": "01",
+          "title": "Too Much, Not Too Hard",
+          "copy": "Most casual puzzle games repeat one mechanic with escalating difficulty and offer no sense of daily shared ritual.",
+          "useVideo": true,
+          "videoFile": "just-enough-01"
+        },
+        {
+          "label": "02",
+          "title": "One Rule: Remove",
+          "copy": "Every level starts overloaded — a cluttered desk, a list of numbers with a hidden rule, a grid that looks solved until you check twice. Removal is the only tool.",
+          "useVideo": true,
+          "videoFile": "just-enough-02"
+        },
+        {
+          "label": "03",
+          "title": "Ten Mechanics, One Constraint",
+          "copy": "Grid logic, number chains, memory match, and NYT-Connections-style categorizing all share the same core move, so the game stays varied without losing its identity.",
+          "useVideo": true,
+          "videoFile": "just-enough-03"
+        },
+        {
+          "label": "04",
+          "title": "Built to Adapt",
+          "copy": "Designed and built solo around a single constraint, spanning 10 distinct mechanics, a daily shared puzzle, and difficulty that adjusts to who's playing.",
+          "useVideo": true,
+          "videoFile": "just-enough-04"
+        },
+        {
+          "label": "05",
+          "title": "Worlds That Unlock",
+          "copy": "Levels are grouped into worlds that open up as you clear the ones before them, each with its own painted backdrop and tone.",
+          "useVideo": true,
+          "videoFile": "just-enough-05"
+        },
+        {
+          "label": "06",
+          "title": "Shipped End to End",
+          "copy": "Shipped an Expo/React Native app solo: game design, level generation logic, Firebase auth/data, crash reporting, and store distribution.",
+          "useVideo": true,
+          "videoFile": "just-enough-06"
+        }
       ]
     }
+  },
+  {
+    "slug": "bazaarx",
+    "name": "BazaarX",
+    "url": "https://bazaarx.vercel.app",
+    "github": "https://github.com/saathvikvisuals/BazaarX",
+    "image": "/project-screenshots/bazaarx.png",
+    "description": "BazaarX - a polished multi-vendor marketplace with vendor/admin dashboards, coupons, mobile-friendly checkout, and demo payments.",
+    "tags": []
   }
 ]
