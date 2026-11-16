@@ -71,64 +71,22 @@
   {
     "slug": "bazaarx",
     "name": "BazaarX",
-    "tag": "Multi-vendor commerce platform",
-    "type": "Marketplace product system",
+    "tag": "Commerce and service experience",
+    "type": "Commerce concept",
     "url": "https://bazaarx.vercel.app",
     "github": "https://github.com/saathvikvisuals/BazaarX",
-    "image": "/project-screenshots/just-enough.png",
+    "image": "/project-screenshots/bazaarx.png",
     "palette": [
-      "#111111",
-      "#f5f5f4",
-      "#f97316"
+      "#0f766e",
+      "#fff7ed",
+      "#111827"
     ],
     "interests": [
-      "commerce",
-      "founders"
+      "founders",
+      "commerce"
     ],
-    "problem": "Marketplaces usually fragment the seller, buyer, admin, and logistics flows into separate experiences that do not feel like one product.",
-    "solution": "Shaped BazaarX into a full marketplace system with vendor onboarding, admin controls, order tracking, coupons, and mobile-friendly checkout.",
-    "outcome": "Demonstrates commerce UX, operational clarity, role-based interfaces, and a product story that scales across buyers, sellers, and admins.",
-    "story": {
-      "layout": "dashboard",
-      "hook": "One marketplace should feel like one system.",
-      "stages": [
-        {
-          "label": "01",
-          "title": "Fragmented Marketplace Flows",
-          "copy": "Marketplaces usually split buyer, seller, admin, and logistics flows into separate experiences that do not feel like one product.",
-          "useVideo": false
-        },
-        {
-          "label": "02",
-          "title": "Selling Needs Structure",
-          "copy": "Built the vendor side around approvals, product actions, and order updates so sellers can operate without losing context.",
-          "useVideo": false
-        },
-        {
-          "label": "03",
-          "title": "Admin Needs Visibility",
-          "copy": "Designed admin tools for platform orders, vendors, coupons, delivery details, and policy-level control.",
-          "useVideo": false
-        },
-        {
-          "label": "04",
-          "title": "Checkout Needs Confidence",
-          "copy": "The checkout flow includes demo payments, coupon discovery, and a delivery timeline so the purchase feels complete.",
-          "useVideo": false
-        },
-        {
-          "label": "05",
-          "title": "Built for Mobile",
-          "copy": "Responsive breakpoints keep the seller, buyer, and admin interfaces usable on smaller screens without collapsing the structure.",
-          "useVideo": false
-        },
-        {
-          "label": "06",
-          "title": "What It Proves",
-          "copy": "Demonstrates commerce UX, operational clarity, role-based interfaces, and a product story that scales across buyers, sellers, and admins.",
-          "useVideo": false
-        }
-      ]
-    }
+    "problem": "The existing experience needed clearer positioning, stronger visual hierarchy, and a more confident path to action.",
+    "solution": "Designed a focused digital experience with responsive UI, clear sections, visual rhythm, and interaction details that support the user journey.",
+    "outcome": "Adds a portfolio-ready case study that can be routed into the right Saathvik Visuals curation room automatically."
   }
 ]
